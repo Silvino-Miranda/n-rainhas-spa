@@ -4,6 +4,7 @@ import { QueensSolverService } from './_shared/services/queens-solver.service';
 import { QueensSolverGaService, GAResult } from './_shared/services/queens-solver-ga.service';
 import { QueensSolverNnService, NNResult } from './_shared/services/queens-solver-nn.service';
 import { QueensSolverBrainService, BrainResult } from './_shared/services/queens-solver-brain.service';
+import { LocalStorageService, ChampionResult, AlgorithmType } from './_shared/services/local-storage.service';
 
 @Component({
   selector: 'app-queens-solver',
@@ -34,28 +35,18 @@ export class QueensSolverComponent {
   
   // Propriedades para Brain.js
   brainHistory: { iteration: number; error: number; validQueens: number }[] = [];
-  
-  // Melhor resultado do AG salvo no localStorage
-  bestGAResult: {
-    n: number;
-    generations: number;
-    solveTime: number;
-    date: string;
-    board: number[][];
-  } | null = null;
 
   // Limites para o número de rainhas
   readonly MIN_QUEENS = 1;
   readonly MAX_QUEENS = 15; // Limitar para evitar travamento do navegador
-  
-  private readonly STORAGE_KEY = 'nqueens_best_ga_result';
 
   constructor(
     private formBuilder: FormBuilder,
     private queensSolver: QueensSolverService,
     private queensSolverGa: QueensSolverGaService,
     private queensSolverNn: QueensSolverNnService,
-    private queensSolverBrain: QueensSolverBrainService
+    private queensSolverBrain: QueensSolverBrainService,
+    private localStorage: LocalStorageService
   ) {
     this.form = this.formBuilder.group({
       queensNumber: [
@@ -68,8 +59,8 @@ export class QueensSolverComponent {
       ]
     });
     
-    // Carregar melhor resultado do localStorage
-    this.loadBestResult();
+    // Migrar dados do formato antigo (se existirem)
+    this.localStorage.migrateFromOldFormat();
   }
 
   onSubmit(): void {
@@ -126,6 +117,9 @@ export class QueensSolverComponent {
       if (result) {
         this.solution = result;
         this.noSolution = false;
+        
+        // Salvar campeão no localStorage
+        this.saveChampion('backtracking', n, this.solveTime, result);
       } else {
         this.solution = null;
         this.noSolution = true;
@@ -139,7 +133,7 @@ export class QueensSolverComponent {
 
     setTimeout(() => {
       // Recuperar o melhor indivíduo salvo para este N (se a opção estiver marcada)
-      const savedResult = this.evolveFromSaved ? this.getBestResultForN(n) : null;
+      const savedResult = this.evolveFromSaved ? this.getGAChampionForN(n) : null;
       const initialBoard = savedResult?.board || undefined;
       
       const startTime = performance.now();
@@ -155,8 +149,8 @@ export class QueensSolverComponent {
         this.evolutionHistory = result.evolutionHistory;
         this.noSolution = false;
         
-        // Salvar melhor resultado no localStorage (incluindo o tabuleiro vencedor)
-        this.saveBestResult(n, result.generations, this.solveTime, result.board);
+        // Salvar campeão no localStorage
+        this.saveChampion('ga', n, this.solveTime, result.board, result.generations);
         
         // Desenhar gráfico após Angular atualizar a view
         setTimeout(() => this.drawChart(), 0);
@@ -187,6 +181,9 @@ export class QueensSolverComponent {
         this.trainingHistory = result.trainingHistory;
         this.noSolution = false;
         
+        // Salvar campeão no localStorage
+        this.saveChampion('nn', n, this.solveTime, result.board, undefined, result.iterations);
+        
         // Desenhar grafico apos Angular atualizar a view
         setTimeout(() => this.drawNNChart(), 0);
       } else {
@@ -216,6 +213,9 @@ export class QueensSolverComponent {
         this.brainHistory = result.trainingHistory;
         this.noSolution = false;
         
+        // Salvar campeão no localStorage
+        this.saveChampion('brain', n, this.solveTime, result.board, undefined, result.iterations);
+        
         // Desenhar gráfico após Angular atualizar a view
         setTimeout(() => this.drawBrainChart(), 0);
       } else {
@@ -240,97 +240,125 @@ export class QueensSolverComponent {
   }
 
   /**
-   * Salva o melhor resultado do AG no localStorage
-   * Salva apenas se for melhor (menos gerações) que o resultado anterior para o mesmo N
+   * Salva um campeão no localStorage
    */
-  private saveBestResult(n: number, generations: number, solveTime: number, board: number[][]): void {
-    const currentBest = this.getBestResultForN(n);
+  private saveChampion(algorithm: AlgorithmType, n: number, solveTime: number, board: number[][], generations?: number, iterations?: number): void {
+    const champion: ChampionResult = {
+      n,
+      algorithm,
+      solveTime,
+      board,
+      date: new Date().toLocaleString('pt-BR'),
+      ...(generations !== undefined && { generations }),
+      ...(iterations !== undefined && { iterations })
+    };
     
-    // Salvar se não existe resultado anterior ou se este é melhor (menos gerações)
-    if (!currentBest || generations < currentBest.generations) {
-      const allResults = this.getAllResults();
-      allResults[n] = {
-        n,
-        generations,
-        solveTime,
-        date: new Date().toLocaleString('pt-BR'),
-        board
-      };
-      
-      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(allResults));
-      this.bestGAResult = allResults[n];
-    }
+    this.localStorage.saveChampion(champion);
   }
 
   /**
-   * Carrega o melhor resultado do localStorage
+   * Obtém todos os campeões para exibição na tabela
    */
-  private loadBestResult(): void {
-    const allResults = this.getAllResults();
-    const keys = Object.keys(allResults).map(Number);
-    
-    if (keys.length > 0) {
-      // Pegar o resultado mais recente ou com maior N
-      const maxN = Math.max(...keys);
-      this.bestGAResult = allResults[maxN];
-    }
+  getAllChampions(): ChampionResult[] {
+    return this.localStorage.getAllChampions();
   }
 
   /**
-   * Obtém o melhor resultado para um N específico
+   * Obtém campeões de um algoritmo específico
    */
-  private getBestResultForN(n: number): { n: number; generations: number; solveTime: number; date: string; board: number[][] } | null {
-    const allResults = this.getAllResults();
-    return allResults[n] || null;
-  }
-
-  /**
-   * Obtém todos os resultados salvos
-   */
-  private getAllResults(): { [key: number]: { n: number; generations: number; solveTime: number; date: string; board: number[][] } } {
-    try {
-      const stored = localStorage.getItem(this.STORAGE_KEY);
-      return stored ? JSON.parse(stored) : {};
-    } catch {
-      return {};
-    }
-  }
-
-  /**
-   * Obtém todos os melhores resultados como array para exibição
-   */
-  getAllBestResults(): { n: number; generations: number; solveTime: number; date: string; board: number[][] }[] {
-    const allResults = this.getAllResults();
-    return Object.values(allResults).sort((a, b) => a.n - b.n);
+  getChampionsByAlgorithm(algorithm: AlgorithmType): ChampionResult[] {
+    return this.localStorage.getChampionsByAlgorithm(algorithm);
   }
 
   /**
    * Carrega uma solução salva para exibição
    */
-  loadSavedSolution(result: { n: number; generations: number; solveTime: number; date: string; board: number[][] }): void {
+  loadSavedSolution(result: ChampionResult): void {
     this.solution = result.board;
     this.queensCount = result.n;
-    this.generations = result.generations;
+    this.algorithmUsed = result.algorithm;
     this.solveTime = result.solveTime;
-    this.algorithmUsed = 'ga';
     this.noSolution = false;
-    this.evolutionHistory = []; // Não temos o histórico salvo
+    
+    if (result.generations !== undefined) {
+      this.generations = result.generations;
+    }
+    if (result.iterations !== undefined) {
+      this.iterations = result.iterations;
+    }
+    
+    // Limpar históricos já que não temos salvos
+    this.evolutionHistory = [];
+    this.trainingHistory = [];
+    this.brainHistory = [];
   }
 
   /**
    * Limpa todos os resultados salvos
    */
   clearAllResults(): void {
-    localStorage.removeItem(this.STORAGE_KEY);
-    this.bestGAResult = null;
+    this.localStorage.clearAll();
   }
 
   /**
-   * Verifica se existe um resultado salvo para o N atual do formulário
+   * Remove campeões de um algoritmo específico
+   */
+  clearAlgorithmResults(algorithm: AlgorithmType): void {
+    this.localStorage.clearAlgorithmChampions(algorithm);
+  }
+
+  /**
+   * Verifica se existe um resultado salvo do GA para o N atual do formulário
    */
   hasSavedResultForCurrentN(): boolean {
     const n = this.form.get('queensNumber')?.value;
-    return n ? !!this.getBestResultForN(n) : false;
+    return n ? this.localStorage.hasChampion('ga', n) : false;
+  }
+
+  /**
+   * Obtém o campeão GA para um N específico (para evoluir a partir dele)
+   */
+  private getGAChampionForN(n: number): ChampionResult | null {
+    return this.localStorage.getChampion('ga', n);
+  }
+
+  /**
+   * Retorna o nome amigável do algoritmo
+   */
+  getAlgorithmLabel(algorithm: AlgorithmType): string {
+    const labels: { [key in AlgorithmType]: string } = {
+      'backtracking': 'Backtracking',
+      'ga': 'Genético',
+      'nn': 'Rede Neural',
+      'brain': 'Brain.js'
+    };
+    return labels[algorithm] || algorithm;
+  }
+
+  /**
+   * Retorna o emoji do algoritmo
+   */
+  getAlgorithmEmoji(algorithm: AlgorithmType): string {
+    const emojis: { [key in AlgorithmType]: string } = {
+      'backtracking': '♟️',
+      'ga': '🧬',
+      'nn': '🧠',
+      'brain': '🔵'
+    };
+    return emojis[algorithm] || '❓';
+  }
+
+  /**
+   * Retorna a classe CSS para a badge do algoritmo
+   */
+  getAlgorithmBadgeClass(algorithm: AlgorithmType): string {
+    const classes: { [key in AlgorithmType]: string } = {
+      'backtracking': 'bg-secondary',
+      'ga': 'bg-success',
+      'nn': 'bg-warning text-dark',
+      'brain': 'bg-info'
+    };
+    return classes[algorithm] || 'bg-secondary';
   }
 
   /**
