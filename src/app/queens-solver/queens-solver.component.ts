@@ -1,7 +1,7 @@
 import { Component, ViewChild, ElementRef } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { QueensSolverService } from './queens-solver.service';
-import { QueensSolverGaService, GAResult } from './queens-solver-ga.service';
+import { QueensSolverService } from './_shared/services/queens-solver.service';
+import { QueensSolverGaService, GAResult } from './_shared/services/queens-solver-ga.service';
 
 @Component({
   selector: 'app-queens-solver',
