@@ -1,6 +1,16 @@
 import { Injectable } from '@angular/core';
 
 /**
+ * Interface para o resultado do AG com histórico de evolução
+ */
+export interface GAResult {
+  board: number[][];
+  generations: number;
+  fitness: number;
+  evolutionHistory: { generation: number; bestFitness: number; avgFitness: number }[];
+}
+
+/**
  * Serviço para resolver o problema das N-Rainhas usando Algoritmo Genético (AG)
  * 
  * Representação do cromossomo: array de N inteiros, onde cada índice representa
@@ -23,12 +33,17 @@ export class QueensSolverGaService {
   /**
    * Resolve o problema das N-Rainhas usando Algoritmo Genético
    * @param n Número de rainhas
-   * @returns Objeto com a solução (matriz NxN) e estatísticas, ou null se não encontrou
+   * @returns Objeto com a solução (matriz NxN), estatísticas e histórico de evolução
    */
-  solve(n: number): { board: number[][], generations: number, fitness: number } | null {
+  solve(n: number): GAResult | null {
     // Casos especiais
     if (n === 1) {
-      return { board: [[1]], generations: 0, fitness: 0 };
+      return { 
+        board: [[1]], 
+        generations: 0, 
+        fitness: 0,
+        evolutionHistory: [{ generation: 0, bestFitness: 0, avgFitness: 0 }]
+      };
     }
     if (n === 2 || n === 3) {
       return null; // Não existe solução
@@ -37,6 +52,9 @@ export class QueensSolverGaService {
     // Ajustar parâmetros baseado no tamanho do problema
     this.adjustParameters(n);
 
+    // Histórico de evolução para o gráfico
+    const evolutionHistory: { generation: number; bestFitness: number; avgFitness: number }[] = [];
+
     // Inicializar população
     let population = this.initializePopulation(n);
     
@@ -44,13 +62,25 @@ export class QueensSolverGaService {
       // Avaliar fitness de cada indivíduo
       const fitnessScores = population.map(individual => this.calculateFitness(individual));
       
+      // Calcular estatísticas para o histórico
+      const bestFitness = Math.min(...fitnessScores);
+      const avgFitness = fitnessScores.reduce((a, b) => a + b, 0) / fitnessScores.length;
+      
+      // Registrar no histórico
+      evolutionHistory.push({
+        generation: generation + 1,
+        bestFitness,
+        avgFitness: Math.round(avgFitness * 100) / 100
+      });
+
       // Verificar se encontramos uma solução perfeita (fitness = 0 conflitos)
-      const bestIndex = fitnessScores.indexOf(Math.min(...fitnessScores));
+      const bestIndex = fitnessScores.indexOf(bestFitness);
       if (fitnessScores[bestIndex] === 0) {
         return {
           board: this.chromosomeToBoard(population[bestIndex]),
           generations: generation + 1,
-          fitness: 0
+          fitness: 0,
+          evolutionHistory
         };
       }
 
@@ -97,7 +127,8 @@ export class QueensSolverGaService {
       return {
         board: this.chromosomeToBoard(population[bestIndex]),
         generations: this.maxGenerations,
-        fitness: 0
+        fitness: 0,
+        evolutionHistory
       };
     }
 

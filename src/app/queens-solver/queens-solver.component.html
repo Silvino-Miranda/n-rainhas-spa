@@ -43,22 +43,42 @@
     <small>Dica: Os casos N=2 e N=3 não possuem solução válida.</small>
   </div>
 
-  <!-- Solution display -->
-  <section *ngIf="solution && !isLoading">
-    <div class="stats">
-      <span><strong>Rainhas:</strong> {{ queensCount }}</span>
-      <span><strong>Algoritmo:</strong> {{ algorithmUsed === 'ga' ? 'Genético' : 'Backtracking' }}</span>
-      <span *ngIf="algorithmUsed === 'ga'"><strong>Gerações:</strong> {{ generations }}</span>
-      <span><strong>Tempo:</strong> {{ solveTime }} ms</span>
+  <!-- Solution display - Two column layout -->
+  <div *ngIf="solution && !isLoading" class="results-container">
+    <div class="results-row">
+      <!-- Coluna do Gráfico (apenas para AG) -->
+      <div class="chart-column" *ngIf="algorithmUsed === 'ga' && evolutionHistory.length > 0">
+        <div class="chart-container">
+          <h5>📈 Evolução do Algoritmo Genético</h5>
+          <canvas #evolutionChart width="450" height="300"></canvas>
+          <div class="chart-info">
+            <span><strong>Gerações:</strong> {{ generations }}</span>
+            <span><strong>Fitness Final:</strong> 0 (solução perfeita)</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Coluna do Tabuleiro -->
+      <div class="board-column" [class.full-width]="algorithmUsed !== 'ga'">
+        <div class="board-container">
+          <h5>♛ Solução Encontrada</h5>
+          <div class="stats">
+            <span><strong>Rainhas:</strong> {{ queensCount }}</span>
+            <span><strong>Algoritmo:</strong> {{ algorithmUsed === 'ga' ? 'Genético' : 'Backtracking' }}</span>
+            <span *ngIf="algorithmUsed === 'ga'"><strong>Gerações:</strong> {{ generations }}</span>
+            <span><strong>Tempo:</strong> {{ solveTime }} ms</span>
+          </div>
+          
+          <table class="chessboard">
+            <tr *ngFor="let row of solution; let rowIndex = index">
+              <td 
+                *ngFor="let cell of row; let colIndex = index" 
+                [class]="getCellClass(rowIndex, colIndex, cell)">
+              </td>
+            </tr>
+          </table>
+        </div>
+      </div>
     </div>
-    
-    <table class="chessboard">
-      <tr *ngFor="let row of solution; let rowIndex = index">
-        <td 
-          *ngFor="let cell of row; let colIndex = index" 
-          [class]="getCellClass(rowIndex, colIndex, cell)">
-        </td>
-      </tr>
-    </table>
-  </section>
+  </div>
 </div>
