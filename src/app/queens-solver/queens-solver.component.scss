@@ -1,6 +1,115 @@
-.queen {
-  background-color: gold;
-  border: 1px solid black;
-  width: 20px;
-  height: 20px;
+// Chessboard styling
+.chessboard {
+  border-collapse: collapse;
+  margin: 20px 0;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+
+  td {
+    width: 50px;
+    height: 50px;
+    text-align: center;
+    vertical-align: middle;
+    font-size: 32px;
+    border: 1px solid #333;
+    transition: all 0.3s ease;
+
+    // Alternating pattern for chessboard
+    &.light {
+      background-color: #f0d9b5;
+    }
+
+    &.dark {
+      background-color: #b58863;
+    }
+
+    // Queen cell styling
+    &.queen {
+      position: relative;
+
+      &::after {
+        content: '♛';
+        color: #2c2c2c;
+        text-shadow: 0 0 3px gold, 0 0 5px gold;
+      }
+
+      &.light {
+        background-color: #90EE90;
+      }
+
+      &.dark {
+        background-color: #228B22;
+      }
+    }
+  }
+}
+
+// Form styling
+.queens-form {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+  flex-wrap: wrap;
+
+  label {
+    font-weight: 500;
+  }
+
+  input[type="number"] {
+    width: 100px;
+    text-align: center;
+  }
+}
+
+// Messages
+.message {
+  padding: 15px;
+  border-radius: 5px;
+  margin: 20px 0;
+
+  &.no-solution {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+  }
+
+  &.info {
+    background-color: #d1ecf1;
+    color: #0c5460;
+    border: 1px solid #bee5eb;
+  }
+}
+
+// Loading spinner
+.loading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #666;
+
+  .spinner {
+    width: 20px;
+    height: 20px;
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #3498db;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+// Stats section
+.stats {
+  margin-top: 15px;
+  padding: 10px;
+  background-color: #e9ecef;
+  border-radius: 5px;
+  font-size: 14px;
+
+  span {
+    margin-right: 20px;
+  }
 }

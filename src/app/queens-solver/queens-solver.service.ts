@@ -44,14 +44,27 @@ export class QueensSolverService {
 
   // verifique se é possível colocar uma rainha na linha e coluna especificadas
   private isValid(board: number[][], row: number, col: number): boolean {
-    // verifique se há alguma rainha na mesma linha ou na mesma diagonal
+    // verifique se há alguma rainha na mesma linha
     for (let i = 0; i < col; i++) {
-      if (board[row][i] === 1 ||
-        row - i === col - board[i][col] ||
-        row + i === col + board[i][col]) {
+      if (board[row][i] === 1) {
         return false;
       }
     }
+
+    // verifique a diagonal superior esquerda
+    for (let i = row - 1, j = col - 1; i >= 0 && j >= 0; i--, j--) {
+      if (board[i][j] === 1) {
+        return false;
+      }
+    }
+
+    // verifique a diagonal inferior esquerda
+    for (let i = row + 1, j = col - 1; i < board.length && j >= 0; i++, j--) {
+      if (board[i][j] === 1) {
+        return false;
+      }
+    }
+
     return true;
   }
 }

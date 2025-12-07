@@ -1,19 +1,57 @@
-<section>
-  <!-- exiba um formulário para o usuário inserir o número de rainhas -->
-  <form class="form-inline" [formGroup]="form" (ngSubmit)="onSubmit()">
-    <label>
-      Número de rainhas:
-      <input type="number" class="form-control" formControlName="queensNumber" />
-    </label>
-    <button type="submit" class="btn btn-primary" [disabled]="form.invalid">Resolver</button>
-  </form>
-</section>
-<br />
-<section>
-  <!-- exiba a tabela da solução -->
-  <table *ngIf="solution" class="table table-bordered table-condensed">
-    <tr *ngFor="let row of solution">
-      <td *ngFor="let cell of row" [class.queen]="cell === 1"></td>
-    </tr>
-  </table>
-</section>
+<div class="container py-4">
+  <h1 class="mb-4">♛ Problema das N-Rainhas</h1>
+  
+  <section>
+    <form class="queens-form" [formGroup]="form" (ngSubmit)="onSubmit()">
+      <label for="queensNumber">Número de rainhas:</label>
+      <input 
+        type="number" 
+        id="queensNumber"
+        class="form-control" 
+        formControlName="queensNumber"
+        [min]="MIN_QUEENS"
+        [max]="MAX_QUEENS"
+      />
+      <button type="submit" class="btn btn-primary" [disabled]="form.invalid || isLoading">
+        <span *ngIf="!isLoading">Resolver</span>
+        <span *ngIf="isLoading">Calculando...</span>
+      </button>
+    </form>
+    
+    <div *ngIf="form.get('queensNumber')?.errors?.['min'] || form.get('queensNumber')?.errors?.['max']" 
+         class="text-danger mt-2">
+      Por favor, insira um valor entre {{ MIN_QUEENS }} e {{ MAX_QUEENS }}.
+    </div>
+  </section>
+
+  <!-- Loading indicator -->
+  <div *ngIf="isLoading" class="loading mt-4">
+    <div class="spinner"></div>
+    <span>Resolvendo o problema das {{ queensCount }}-rainhas...</span>
+  </div>
+
+  <!-- No solution message -->
+  <div *ngIf="noSolution && !isLoading" class="message no-solution">
+    <strong>Sem solução!</strong> 
+    Não existe solução para o problema das {{ queensCount }}-rainhas.
+    <br>
+    <small>Dica: Os casos N=2 e N=3 não possuem solução válida.</small>
+  </div>
+
+  <!-- Solution display -->
+  <section *ngIf="solution && !isLoading">
+    <div class="stats">
+      <span><strong>Rainhas:</strong> {{ queensCount }}</span>
+      <span><strong>Tempo:</strong> {{ solveTime }} ms</span>
+    </div>
+    
+    <table class="chessboard">
+      <tr *ngFor="let row of solution; let rowIndex = index">
+        <td 
+          *ngFor="let cell of row; let colIndex = index" 
+          [class]="getCellClass(rowIndex, colIndex, cell)">
+        </td>
+      </tr>
+    </table>
+  </section>
+</div>

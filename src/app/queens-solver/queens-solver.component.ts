@@ -9,29 +9,76 @@ import { QueensSolverService } from './queens-solver.service';
 })
 export class QueensSolverComponent {
   form: FormGroup;
-  // armazene a solução das N rainhas aqui
-  solution: number[][] = [];
+  
+  // Estado da aplicação
+  solution: number[][] | null = null;
+  isLoading = false;
+  noSolution = false;
+  solveTime = 0;
+  queensCount = 0;
 
-  // injete o service de resolução das N rainhas
-  constructor(private formBuilder: FormBuilder,
-    private queensSolver: QueensSolverService) {
+  // Limites para o número de rainhas
+  readonly MIN_QUEENS = 1;
+  readonly MAX_QUEENS = 15; // Limitar para evitar travamento do navegador
+
+  constructor(
+    private formBuilder: FormBuilder,
+    private queensSolver: QueensSolverService
+  ) {
     this.form = this.formBuilder.group({
-      queensNumber: ['', Validators.required]
+      queensNumber: [
+        4, // valor padrão
+        [
+          Validators.required,
+          Validators.min(this.MIN_QUEENS),
+          Validators.max(this.MAX_QUEENS)
+        ]
+      ]
     });
   }
 
   onSubmit(): void {
-    const queensNumber = this.form.get('queensNumber').value;
-    // chame o método de resolução das N rainhas aqui
+    if (this.form.invalid) {
+      return;
+    }
 
-    console.log(queensNumber);
-
+    const queensNumber = this.form.get('queensNumber')?.value;
     this.solve(queensNumber);
   }
 
-  // chame o service de resolução das N rainhas quando o usuário clicar no botão
   solve(n: number): void {
-    this.solution = this.queensSolver.solve(n);
-    console.log(this.solution);
+    // Reset estado
+    this.solution = null;
+    this.noSolution = false;
+    this.isLoading = true;
+    this.queensCount = n;
+
+    // Usar setTimeout para permitir que a UI atualize antes de resolver
+    setTimeout(() => {
+      const startTime = performance.now();
+      const result = this.queensSolver.solve(n);
+      const endTime = performance.now();
+      
+      this.solveTime = Math.round((endTime - startTime) * 100) / 100;
+      this.isLoading = false;
+
+      if (result) {
+        this.solution = result;
+        this.noSolution = false;
+      } else {
+        this.solution = null;
+        this.noSolution = true;
+      }
+    }, 10);
+  }
+
+  /**
+   * Retorna a classe CSS para uma célula do tabuleiro
+   * Alterna entre 'light' e 'dark' para criar o padrão de xadrez
+   */
+  getCellClass(rowIndex: number, colIndex: number, cellValue: number): string {
+    const isLight = (rowIndex + colIndex) % 2 === 0;
+    const baseClass = isLight ? 'light' : 'dark';
+    return cellValue === 1 ? `${baseClass} queen` : baseClass;
   }
 }
