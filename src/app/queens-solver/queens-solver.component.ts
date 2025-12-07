@@ -24,6 +24,7 @@ export class QueensSolverComponent {
   generations = 0;
   algorithmUsed: 'backtracking' | 'ga' | null = null;
   evolutionHistory: { generation: number; bestFitness: number; avgFitness: number }[] = [];
+  evolveFromSaved = true; // Checkbox para evoluir a partir do resultado salvo
   
   // Melhor resultado do AG salvo no localStorage
   bestGAResult: {
@@ -108,8 +109,12 @@ export class QueensSolverComponent {
     this.algorithmUsed = 'ga';
 
     setTimeout(() => {
+      // Recuperar o melhor indivíduo salvo para este N (se a opção estiver marcada)
+      const savedResult = this.evolveFromSaved ? this.getBestResultForN(n) : null;
+      const initialBoard = savedResult?.board || undefined;
+      
       const startTime = performance.now();
-      const result = this.queensSolverGa.solve(n);
+      const result = this.queensSolverGa.solve(n, initialBoard);
       const endTime = performance.now();
       
       this.solveTime = Math.round((endTime - startTime) * 100) / 100;
@@ -228,6 +233,14 @@ export class QueensSolverComponent {
   clearAllResults(): void {
     localStorage.removeItem(this.STORAGE_KEY);
     this.bestGAResult = null;
+  }
+
+  /**
+   * Verifica se existe um resultado salvo para o N atual do formulário
+   */
+  hasSavedResultForCurrentN(): boolean {
+    const n = this.form.get('queensNumber')?.value;
+    return n ? !!this.getBestResultForN(n) : false;
   }
 
   /**

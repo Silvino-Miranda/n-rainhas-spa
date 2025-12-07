@@ -33,9 +33,10 @@ export class QueensSolverGaService {
   /**
    * Resolve o problema das N-Rainhas usando Algoritmo Genético
    * @param n Número de rainhas
+   * @param initialBoard Tabuleiro inicial opcional (para continuar evolução de um resultado salvo)
    * @returns Objeto com a solução (matriz NxN), estatísticas e histórico de evolução
    */
-  solve(n: number): GAResult | null {
+  solve(n: number, initialBoard?: number[][]): GAResult | null {
     // Casos especiais
     if (n === 1) {
       return { 
@@ -55,8 +56,14 @@ export class QueensSolverGaService {
     // Histórico de evolução para o gráfico
     const evolutionHistory: { generation: number; bestFitness: number; avgFitness: number }[] = [];
 
-    // Inicializar população
-    let population = this.initializePopulation(n);
+    // Inicializar população (com ou sem indivíduo inicial)
+    let population: number[][];
+    if (initialBoard) {
+      const seedChromosome = this.boardToChromosome(initialBoard);
+      population = this.initializePopulationWithSeed(n, seedChromosome);
+    } else {
+      population = this.initializePopulation(n);
+    }
     
     for (let generation = 0; generation < this.maxGenerations; generation++) {
       // Avaliar fitness de cada indivíduo
@@ -166,6 +173,52 @@ export class QueensSolverGaService {
     }
     
     return population;
+  }
+
+  /**
+   * Inicializa a população usando um cromossomo "semente" (melhor indivíduo salvo)
+   * Inclui o cromossomo semente e variações dele (mutações) na população inicial
+   */
+  private initializePopulationWithSeed(n: number, seedChromosome: number[]): number[][] {
+    const population: number[][] = [];
+    
+    // Adicionar o cromossomo semente como primeiro indivíduo
+    population.push([...seedChromosome]);
+    
+    // Adicionar algumas mutações do cromossomo semente (25% da população)
+    const seedMutations = Math.floor(this.populationSize * 0.25);
+    for (let i = 0; i < seedMutations; i++) {
+      const mutated = this.mutate([...seedChromosome]);
+      population.push(mutated);
+    }
+    
+    // Preencher o resto com indivíduos aleatórios
+    while (population.length < this.populationSize) {
+      const individual = Array.from({ length: n }, (_, index) => index);
+      this.shuffleArray(individual);
+      population.push(individual);
+    }
+    
+    return population;
+  }
+
+  /**
+   * Converte um tabuleiro (matriz NxN) para um cromossomo (array de posições de linha)
+   */
+  private boardToChromosome(board: number[][]): number[] {
+    const n = board.length;
+    const chromosome: number[] = new Array(n);
+    
+    for (let col = 0; col < n; col++) {
+      for (let row = 0; row < n; row++) {
+        if (board[row][col] === 1) {
+          chromosome[col] = row;
+          break;
+        }
+      }
+    }
+    
+    return chromosome;
   }
 
   /**
