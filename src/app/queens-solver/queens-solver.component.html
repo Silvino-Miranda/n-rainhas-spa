@@ -20,6 +20,10 @@
         <span *ngIf="!isLoading || algorithmUsed !== 'ga'">Algoritmo Genético</span>
         <span *ngIf="isLoading && algorithmUsed === 'ga'">Evoluindo...</span>
       </button>
+      <button type="button" class="btn btn-warning" [disabled]="form.invalid || isLoading" (click)="onSubmitNN()">
+        <span *ngIf="!isLoading || algorithmUsed !== 'nn'">🧠 Rede Neural</span>
+        <span *ngIf="isLoading && algorithmUsed === 'nn'">Treinando...</span>
+      </button>
       
       <div class="form-check evolve-checkbox" *ngIf="hasSavedResultForCurrentN()">
         <input class="form-check-input" type="checkbox" id="evolveFromSaved" [(ngModel)]="evolveFromSaved" [ngModelOptions]="{standalone: true}">
@@ -76,6 +80,7 @@
     <div class="spinner"></div>
     <span *ngIf="algorithmUsed === 'backtracking'">Resolvendo com Backtracking...</span>
     <span *ngIf="algorithmUsed === 'ga'">Evoluindo população genética...</span>
+    <span *ngIf="algorithmUsed === 'nn'">Treinando rede neural de Hopfield...</span>
   </div>
 
   <!-- No solution message -->
@@ -90,13 +95,16 @@
   <div *ngIf="solution && !isLoading" class="results-container">
     <div class="results-row">
       <!-- Coluna do Tabuleiro (primeira coluna) -->
-      <div class="board-column" [class.full-width]="algorithmUsed !== 'ga'">
+      <div class="board-column" [class.full-width]="algorithmUsed === 'backtracking'">
         <div class="board-container">
           <h5>♛ Solução Encontrada</h5>
           <div class="stats">
             <span><strong>Rainhas:</strong> {{ queensCount }}</span>
-            <span><strong>Algoritmo:</strong> {{ algorithmUsed === 'ga' ? 'Genético' : 'Backtracking' }}</span>
+            <span><strong>Algoritmo:</strong> 
+              {{ algorithmUsed === 'ga' ? 'Genético' : (algorithmUsed === 'nn' ? 'Rede Neural' : 'Backtracking') }}
+            </span>
             <span *ngIf="algorithmUsed === 'ga'"><strong>Gerações:</strong> {{ generations }}</span>
+            <span *ngIf="algorithmUsed === 'nn'"><strong>Iterações:</strong> {{ iterations }}</span>
             <span><strong>Tempo:</strong> {{ solveTime }} ms</span>
           </div>
           
@@ -111,14 +119,19 @@
         </div>
       </div>
 
-      <!-- Coluna do Gráfico (segunda coluna, apenas para AG) -->
-      <div class="chart-column" *ngIf="algorithmUsed === 'ga' && evolutionHistory.length > 0">
+      <!-- Coluna do Gráfico (segunda coluna, para AG e NN) -->
+      <div class="chart-column" *ngIf="(algorithmUsed === 'ga' && evolutionHistory.length > 0) || (algorithmUsed === 'nn' && trainingHistory.length > 0)">
         <div class="chart-container">
-          <h5>📈 Evolução do Algoritmo Genético</h5>
+          <h5 *ngIf="algorithmUsed === 'ga'">📈 Evolução do Algoritmo Genético</h5>
+          <h5 *ngIf="algorithmUsed === 'nn'">🧠 Treinamento da Rede Neural</h5>
           <canvas #evolutionChart width="450" height="300"></canvas>
-          <div class="chart-info">
+          <div class="chart-info" *ngIf="algorithmUsed === 'ga'">
             <span><strong>Gerações:</strong> {{ generations }}</span>
             <span><strong>Fitness Final:</strong> 0 (solução perfeita)</span>
+          </div>
+          <div class="chart-info" *ngIf="algorithmUsed === 'nn'">
+            <span><strong>Iterações:</strong> {{ iterations }}</span>
+            <span><strong>Energia Final:</strong> 0 (solução perfeita)</span>
           </div>
         </div>
       </div>

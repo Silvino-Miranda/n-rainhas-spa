@@ -2,6 +2,7 @@ import { Component, ViewChild, ElementRef } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { QueensSolverService } from './_shared/services/queens-solver.service';
 import { QueensSolverGaService, GAResult } from './_shared/services/queens-solver-ga.service';
+import { QueensSolverNnService, NNResult } from './_shared/services/queens-solver-nn.service';
 
 @Component({
   selector: 'app-queens-solver',
@@ -22,9 +23,13 @@ export class QueensSolverComponent {
   
   // Propriedades para AG
   generations = 0;
-  algorithmUsed: 'backtracking' | 'ga' | null = null;
+  algorithmUsed: 'backtracking' | 'ga' | 'nn' | null = null;
   evolutionHistory: { generation: number; bestFitness: number; avgFitness: number }[] = [];
   evolveFromSaved = true; // Checkbox para evoluir a partir do resultado salvo
+  
+  // Propriedades para Rede Neural
+  iterations = 0;
+  trainingHistory: { iteration: number; energy: number; validQueens: number }[] = [];
   
   // Melhor resultado do AG salvo no localStorage
   bestGAResult: {
@@ -44,7 +49,8 @@ export class QueensSolverComponent {
   constructor(
     private formBuilder: FormBuilder,
     private queensSolver: QueensSolverService,
-    private queensSolverGa: QueensSolverGaService
+    private queensSolverGa: QueensSolverGaService,
+    private queensSolverNn: QueensSolverNnService
   ) {
     this.form = this.formBuilder.group({
       queensNumber: [
@@ -77,6 +83,15 @@ export class QueensSolverComponent {
 
     const queensNumber = this.form.get('queensNumber')?.value;
     this.solveWithGA(queensNumber);
+  }
+
+  onSubmitNN(): void {
+    if (this.form.invalid) {
+      return;
+    }
+
+    const queensNumber = this.form.get('queensNumber')?.value;
+    this.solveWithNN(queensNumber);
   }
 
   solve(n: number): void {
@@ -140,6 +155,35 @@ export class QueensSolverComponent {
     }, 10);
   }
 
+  solveWithNN(n: number): void {
+    this.resetState(n);
+    this.algorithmUsed = 'nn';
+
+    setTimeout(() => {
+      const startTime = performance.now();
+      const result = this.queensSolverNn.solve(n);
+      const endTime = performance.now();
+      
+      this.solveTime = Math.round((endTime - startTime) * 100) / 100;
+      this.isLoading = false;
+
+      if (result) {
+        this.solution = result.board;
+        this.iterations = result.iterations;
+        this.trainingHistory = result.trainingHistory;
+        this.noSolution = false;
+        
+        // Desenhar grafico apos Angular atualizar a view
+        setTimeout(() => this.drawNNChart(), 0);
+      } else {
+        this.solution = null;
+        this.iterations = 0;
+        this.trainingHistory = [];
+        this.noSolution = true;
+      }
+    }, 10);
+  }
+
   private resetState(n: number): void {
     this.solution = null;
     this.noSolution = false;
@@ -147,6 +191,8 @@ export class QueensSolverComponent {
     this.queensCount = n;
     this.generations = 0;
     this.evolutionHistory = [];
+    this.iterations = 0;
+    this.trainingHistory = [];
   }
 
   /**
@@ -381,5 +427,138 @@ export class QueensSolverComponent {
     ctx.setLineDash([]);
     ctx.fillStyle = '#333';
     ctx.fillText('Média', legendX + 25, legendY + 28);
+  }
+
+  /**
+   * Desenha o gráfico de treinamento da Rede Neural no canvas
+   */
+  drawNNChart(): void {
+    if (!this.chartCanvas || this.trainingHistory.length === 0) return;
+
+    const canvas = this.chartCanvas.nativeElement;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const width = canvas.width;
+    const height = canvas.height;
+    const padding = 50;
+    const chartWidth = width - padding * 2;
+    const chartHeight = height - padding * 2;
+
+    // Limpar canvas
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, width, height);
+
+    // Dados
+    const data = this.trainingHistory;
+    const maxEnergy = Math.max(...data.map(d => d.energy), 1);
+    const maxIter = data.length;
+
+    // Desenhar grid
+    ctx.strokeStyle = '#e0e0e0';
+    ctx.lineWidth = 1;
+    for (let i = 0; i <= 5; i++) {
+      const y = padding + (chartHeight / 5) * i;
+      ctx.beginPath();
+      ctx.moveTo(padding, y);
+      ctx.lineTo(width - padding, y);
+      ctx.stroke();
+    }
+
+    // Eixos
+    ctx.strokeStyle = '#333333';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(padding, padding);
+    ctx.lineTo(padding, height - padding);
+    ctx.lineTo(width - padding, height - padding);
+    ctx.stroke();
+
+    // Labels dos eixos
+    ctx.fillStyle = '#333333';
+    ctx.font = 'bold 12px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText('Iterações', width / 2, height - 10);
+    
+    ctx.save();
+    ctx.translate(15, height / 2);
+    ctx.rotate(-Math.PI / 2);
+    ctx.fillText('Energia', 0, 0);
+    ctx.restore();
+
+    // Escala Y
+    ctx.font = '11px Arial';
+    ctx.textAlign = 'right';
+    for (let i = 0; i <= 5; i++) {
+      const y = padding + (chartHeight / 5) * i;
+      const val = Math.round(maxEnergy * (5 - i) / 5 * 10) / 10;
+      ctx.fillText(val.toString(), padding - 8, y + 4);
+    }
+
+    // Escala X
+    ctx.textAlign = 'center';
+    const xSteps = Math.min(5, maxIter);
+    for (let i = 0; i <= xSteps; i++) {
+      const x = padding + (chartWidth / xSteps) * i;
+      const iter = Math.round((maxIter * 10 / xSteps) * i); // *10 porque registramos a cada 10 iterações
+      ctx.fillText(iter.toString(), x, height - padding + 20);
+    }
+
+    // Linha de energia (roxo)
+    ctx.strokeStyle = '#9c27b0';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    data.forEach((d, i) => {
+      const x = padding + (i / (maxIter - 1 || 1)) * chartWidth;
+      const y = height - padding - (d.energy / maxEnergy) * chartHeight;
+      if (i === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    });
+    ctx.stroke();
+
+    // Linha de rainhas válidas (laranja tracejada) - normalizada para caber no gráfico
+    const maxQueens = this.queensCount;
+    ctx.strokeStyle = '#ff9800';
+    ctx.lineWidth = 2;
+    ctx.setLineDash([5, 5]);
+    ctx.beginPath();
+    data.forEach((d, i) => {
+      const x = padding + (i / (maxIter - 1 || 1)) * chartWidth;
+      // Invertemos porque queremos que N rainhas válidas = 0 conflitos (topo do gráfico)
+      const normalizedQueens = (maxQueens - d.validQueens) / maxQueens * maxEnergy;
+      const y = height - padding - (normalizedQueens / maxEnergy) * chartHeight;
+      if (i === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    });
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // Legenda
+    const legendX = width - 150;
+    const legendY = padding + 10;
+    
+    ctx.fillStyle = '#f8f9fa';
+    ctx.fillRect(legendX - 10, legendY - 5, 140, 50);
+    ctx.strokeStyle = '#dee2e6';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(legendX - 10, legendY - 5, 140, 50);
+
+    ctx.font = '11px Arial';
+    ctx.textAlign = 'left';
+    
+    ctx.fillStyle = '#9c27b0';
+    ctx.fillRect(legendX, legendY + 5, 20, 3);
+    ctx.fillStyle = '#333';
+    ctx.fillText('Energia', legendX + 25, legendY + 10);
+    
+    ctx.strokeStyle = '#ff9800';
+    ctx.setLineDash([5, 5]);
+    ctx.beginPath();
+    ctx.moveTo(legendX, legendY + 25);
+    ctx.lineTo(legendX + 20, legendY + 25);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = '#333';
+    ctx.fillText('Conflitos', legendX + 25, legendY + 28);
   }
 }
