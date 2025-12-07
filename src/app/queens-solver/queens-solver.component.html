@@ -46,19 +46,7 @@
   <!-- Solution display - Two column layout -->
   <div *ngIf="solution && !isLoading" class="results-container">
     <div class="results-row">
-      <!-- Coluna do Gráfico (apenas para AG) -->
-      <div class="chart-column" *ngIf="algorithmUsed === 'ga' && evolutionHistory.length > 0">
-        <div class="chart-container">
-          <h5>📈 Evolução do Algoritmo Genético</h5>
-          <canvas #evolutionChart width="450" height="300"></canvas>
-          <div class="chart-info">
-            <span><strong>Gerações:</strong> {{ generations }}</span>
-            <span><strong>Fitness Final:</strong> 0 (solução perfeita)</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Coluna do Tabuleiro -->
+      <!-- Coluna do Tabuleiro (primeira coluna) -->
       <div class="board-column" [class.full-width]="algorithmUsed !== 'ga'">
         <div class="board-container">
           <h5>♛ Solução Encontrada</h5>
@@ -77,6 +65,18 @@
               </td>
             </tr>
           </table>
+        </div>
+      </div>
+
+      <!-- Coluna do Gráfico (segunda coluna, apenas para AG) -->
+      <div class="chart-column" *ngIf="algorithmUsed === 'ga' && evolutionHistory.length > 0">
+        <div class="chart-container">
+          <h5>📈 Evolução do Algoritmo Genético</h5>
+          <canvas #evolutionChart width="450" height="300"></canvas>
+          <div class="chart-info">
+            <span><strong>Gerações:</strong> {{ generations }}</span>
+            <span><strong>Fitness Final:</strong> 0 (solução perfeita)</span>
+          </div>
         </div>
       </div>
     </div>
