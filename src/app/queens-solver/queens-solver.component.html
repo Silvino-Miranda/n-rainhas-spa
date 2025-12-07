@@ -1,0 +1,19 @@
+<section>
+  <!-- exiba um formulário para o usuário inserir o número de rainhas -->
+  <form class="form-inline" [formGroup]="form" (ngSubmit)="onSubmit()">
+    <label>
+      Número de rainhas:
+      <input type="number" class="form-control" formControlName="queensNumber" />
+    </label>
+    <button type="submit" class="btn btn-primary" [disabled]="form.invalid">Resolver</button>
+  </form>
+</section>
+<br />
+<section>
+  <!-- exiba a tabela da solução -->
+  <table *ngIf="solution" class="table table-bordered table-condensed">
+    <tr *ngFor="let row of solution">
+      <td *ngFor="let cell of row" [class.queen]="cell === 1"></td>
+    </tr>
+  </table>
+</section>
