@@ -24,10 +24,21 @@ export class QueensSolverComponent {
   generations = 0;
   algorithmUsed: 'backtracking' | 'ga' | null = null;
   evolutionHistory: { generation: number; bestFitness: number; avgFitness: number }[] = [];
+  
+  // Melhor resultado do AG salvo no localStorage
+  bestGAResult: {
+    n: number;
+    generations: number;
+    solveTime: number;
+    date: string;
+    board: number[][];
+  } | null = null;
 
   // Limites para o número de rainhas
   readonly MIN_QUEENS = 1;
   readonly MAX_QUEENS = 15; // Limitar para evitar travamento do navegador
+  
+  private readonly STORAGE_KEY = 'nqueens_best_ga_result';
 
   constructor(
     private formBuilder: FormBuilder,
@@ -44,6 +55,9 @@ export class QueensSolverComponent {
         ]
       ]
     });
+    
+    // Carregar melhor resultado do localStorage
+    this.loadBestResult();
   }
 
   onSubmit(): void {
@@ -106,6 +120,10 @@ export class QueensSolverComponent {
         this.generations = result.generations;
         this.evolutionHistory = result.evolutionHistory;
         this.noSolution = false;
+        
+        // Salvar melhor resultado no localStorage (incluindo o tabuleiro vencedor)
+        this.saveBestResult(n, result.generations, this.solveTime, result.board);
+        
         // Desenhar gráfico após Angular atualizar a view
         setTimeout(() => this.drawChart(), 0);
       } else {
@@ -124,6 +142,92 @@ export class QueensSolverComponent {
     this.queensCount = n;
     this.generations = 0;
     this.evolutionHistory = [];
+  }
+
+  /**
+   * Salva o melhor resultado do AG no localStorage
+   * Salva apenas se for melhor (menos gerações) que o resultado anterior para o mesmo N
+   */
+  private saveBestResult(n: number, generations: number, solveTime: number, board: number[][]): void {
+    const currentBest = this.getBestResultForN(n);
+    
+    // Salvar se não existe resultado anterior ou se este é melhor (menos gerações)
+    if (!currentBest || generations < currentBest.generations) {
+      const allResults = this.getAllResults();
+      allResults[n] = {
+        n,
+        generations,
+        solveTime,
+        date: new Date().toLocaleString('pt-BR'),
+        board
+      };
+      
+      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(allResults));
+      this.bestGAResult = allResults[n];
+    }
+  }
+
+  /**
+   * Carrega o melhor resultado do localStorage
+   */
+  private loadBestResult(): void {
+    const allResults = this.getAllResults();
+    const keys = Object.keys(allResults).map(Number);
+    
+    if (keys.length > 0) {
+      // Pegar o resultado mais recente ou com maior N
+      const maxN = Math.max(...keys);
+      this.bestGAResult = allResults[maxN];
+    }
+  }
+
+  /**
+   * Obtém o melhor resultado para um N específico
+   */
+  private getBestResultForN(n: number): { n: number; generations: number; solveTime: number; date: string; board: number[][] } | null {
+    const allResults = this.getAllResults();
+    return allResults[n] || null;
+  }
+
+  /**
+   * Obtém todos os resultados salvos
+   */
+  private getAllResults(): { [key: number]: { n: number; generations: number; solveTime: number; date: string; board: number[][] } } {
+    try {
+      const stored = localStorage.getItem(this.STORAGE_KEY);
+      return stored ? JSON.parse(stored) : {};
+    } catch {
+      return {};
+    }
+  }
+
+  /**
+   * Obtém todos os melhores resultados como array para exibição
+   */
+  getAllBestResults(): { n: number; generations: number; solveTime: number; date: string; board: number[][] }[] {
+    const allResults = this.getAllResults();
+    return Object.values(allResults).sort((a, b) => a.n - b.n);
+  }
+
+  /**
+   * Carrega uma solução salva para exibição
+   */
+  loadSavedSolution(result: { n: number; generations: number; solveTime: number; date: string; board: number[][] }): void {
+    this.solution = result.board;
+    this.queensCount = result.n;
+    this.generations = result.generations;
+    this.solveTime = result.solveTime;
+    this.algorithmUsed = 'ga';
+    this.noSolution = false;
+    this.evolutionHistory = []; // Não temos o histórico salvo
+  }
+
+  /**
+   * Limpa todos os resultados salvos
+   */
+  clearAllResults(): void {
+    localStorage.removeItem(this.STORAGE_KEY);
+    this.bestGAResult = null;
   }
 
   /**
