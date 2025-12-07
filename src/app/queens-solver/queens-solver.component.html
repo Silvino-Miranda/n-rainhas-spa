@@ -2,7 +2,7 @@
   <h1 class="mb-4">♛ Problema das N-Rainhas</h1>
   
   <section>
-    <form class="queens-form" [formGroup]="form" (ngSubmit)="onSubmit()">
+    <form class="queens-form" [formGroup]="form">
       <label for="queensNumber">Número de rainhas:</label>
       <input 
         type="number" 
@@ -12,9 +12,13 @@
         [min]="MIN_QUEENS"
         [max]="MAX_QUEENS"
       />
-      <button type="submit" class="btn btn-primary" [disabled]="form.invalid || isLoading">
-        <span *ngIf="!isLoading">Resolver</span>
-        <span *ngIf="isLoading">Calculando...</span>
+      <button type="button" class="btn btn-primary" [disabled]="form.invalid || isLoading" (click)="onSubmit()">
+        <span *ngIf="!isLoading || algorithmUsed !== 'backtracking'">Backtracking</span>
+        <span *ngIf="isLoading && algorithmUsed === 'backtracking'">Calculando...</span>
+      </button>
+      <button type="button" class="btn btn-success" [disabled]="form.invalid || isLoading" (click)="onSubmitGA()">
+        <span *ngIf="!isLoading || algorithmUsed !== 'ga'">Algoritmo Genético</span>
+        <span *ngIf="isLoading && algorithmUsed === 'ga'">Evoluindo...</span>
       </button>
     </form>
     
@@ -27,7 +31,8 @@
   <!-- Loading indicator -->
   <div *ngIf="isLoading" class="loading mt-4">
     <div class="spinner"></div>
-    <span>Resolvendo o problema das {{ queensCount }}-rainhas...</span>
+    <span *ngIf="algorithmUsed === 'backtracking'">Resolvendo com Backtracking...</span>
+    <span *ngIf="algorithmUsed === 'ga'">Evoluindo população genética...</span>
   </div>
 
   <!-- No solution message -->
@@ -42,6 +47,8 @@
   <section *ngIf="solution && !isLoading">
     <div class="stats">
       <span><strong>Rainhas:</strong> {{ queensCount }}</span>
+      <span><strong>Algoritmo:</strong> {{ algorithmUsed === 'ga' ? 'Genético' : 'Backtracking' }}</span>
+      <span *ngIf="algorithmUsed === 'ga'"><strong>Gerações:</strong> {{ generations }}</span>
       <span><strong>Tempo:</strong> {{ solveTime }} ms</span>
     </div>
     
