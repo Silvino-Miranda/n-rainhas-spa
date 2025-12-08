@@ -1,21 +1,18 @@
 import { NgModule } from '@angular/core';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { BrowserModule } from '@angular/platform-browser';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
-import { QueensSolverComponent } from './queens-solver/queens-solver.component';
+import { QueensSolverModule } from './queens-solver/queens-solver.module';
 
 @NgModule({
   declarations: [
-    AppComponent,
-    QueensSolverComponent
+    AppComponent
   ],
   imports: [
     BrowserModule,
     AppRoutingModule,
-    FormsModule,
-    ReactiveFormsModule
+    QueensSolverModule
   ],
   providers: [],
   bootstrap: [AppComponent]
