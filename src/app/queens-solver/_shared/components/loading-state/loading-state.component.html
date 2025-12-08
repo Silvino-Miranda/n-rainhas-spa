@@ -1,0 +1,7 @@
+<div class="loading" *ngIf="isLoading">
+  <div class="spinner"></div>
+  <span *ngIf="algorithmUsed === 'backtracking'">Resolvendo com Backtracking...</span>
+  <span *ngIf="algorithmUsed === 'ga'">Evoluindo população genética...</span>
+  <span *ngIf="algorithmUsed === 'nn'">Treinando rede neural de Hopfield...</span>
+  <span *ngIf="algorithmUsed === 'brain'">Treinando Brain.js neural network...</span>
+</div>

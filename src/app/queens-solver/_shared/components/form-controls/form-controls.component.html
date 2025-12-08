@@ -1,0 +1,44 @@
+<form class="queens-form" [formGroup]="form">
+  <label for="queensNumber">Número de rainhas:</label>
+  <input
+    type="number"
+    id="queensNumber"
+    class="form-control"
+    formControlName="queensNumber"
+    [min]="minQueens"
+    [max]="maxQueens"
+  />
+
+  <button type="button" class="btn btn-primary" [disabled]="form.invalid || isLoading" (click)="onBacktracking()">
+    <span *ngIf="!isLoading || algorithmUsed !== 'backtracking'">Backtracking</span>
+    <span *ngIf="isLoading && algorithmUsed === 'backtracking'">Calculando...</span>
+  </button>
+
+  <button type="button" class="btn btn-success" [disabled]="form.invalid || isLoading" (click)="onGa()">
+    <span *ngIf="!isLoading || algorithmUsed !== 'ga'">Algoritmo Genético</span>
+    <span *ngIf="isLoading && algorithmUsed === 'ga'">Evoluindo...</span>
+  </button>
+
+  <button type="button" class="btn btn-warning" [disabled]="form.invalid || isLoading" (click)="onNn()">
+    <span *ngIf="!isLoading || algorithmUsed !== 'nn'">🧠 Rede Neural</span>
+    <span *ngIf="isLoading && algorithmUsed === 'nn'">Treinando...</span>
+  </button>
+
+  <button type="button" class="btn btn-info" [disabled]="form.invalid || isLoading" (click)="onBrain()">
+    <span *ngIf="!isLoading || algorithmUsed !== 'brain'">🔵 Brain.js</span>
+    <span *ngIf="isLoading && algorithmUsed === 'brain'">Aprendendo...</span>
+  </button>
+
+  <div class="form-check evolve-checkbox" *ngIf="showEvolveFromSaved">
+    <input
+      class="form-check-input"
+      type="checkbox"
+      id="evolveFromSaved"
+      [checked]="evolveFromSaved"
+      (change)="onToggleEvolve($event)"
+    />
+    <label class="form-check-label" for="evolveFromSaved">
+      🧬 Evoluir a partir do melhor salvo
+    </label>
+  </div>
+</form>

@@ -1,160 +1,43 @@
 <div class="container py-4">
   <h1 class="mb-4">♛ Problema das N-Rainhas</h1>
-  
+
   <section>
-    <form class="queens-form" [formGroup]="form">
-      <label for="queensNumber">Número de rainhas:</label>
-      <input 
-        type="number" 
-        id="queensNumber"
-        class="form-control" 
-        formControlName="queensNumber"
-        [min]="MIN_QUEENS"
-        [max]="MAX_QUEENS"
-      />
-      <button type="button" class="btn btn-primary" [disabled]="form.invalid || isLoading" (click)="onSubmit()">
-        <span *ngIf="!isLoading || algorithmUsed !== 'backtracking'">Backtracking</span>
-        <span *ngIf="isLoading && algorithmUsed === 'backtracking'">Calculando...</span>
-      </button>
-      <button type="button" class="btn btn-success" [disabled]="form.invalid || isLoading" (click)="onSubmitGA()">
-        <span *ngIf="!isLoading || algorithmUsed !== 'ga'">Algoritmo Genético</span>
-        <span *ngIf="isLoading && algorithmUsed === 'ga'">Evoluindo...</span>
-      </button>
-      <button type="button" class="btn btn-warning" [disabled]="form.invalid || isLoading" (click)="onSubmitNN()">
-        <span *ngIf="!isLoading || algorithmUsed !== 'nn'">🧠 Rede Neural</span>
-        <span *ngIf="isLoading && algorithmUsed === 'nn'">Treinando...</span>
-      </button>
-      <button type="button" class="btn btn-info" [disabled]="form.invalid || isLoading" (click)="onSubmitBrain()">
-        <span *ngIf="!isLoading || algorithmUsed !== 'brain'">🔵 Brain.js</span>
-        <span *ngIf="isLoading && algorithmUsed === 'brain'">Aprendendo...</span>
-      </button>
-      
-      <div class="form-check evolve-checkbox" *ngIf="hasSavedResultForCurrentN()">
-        <input class="form-check-input" type="checkbox" id="evolveFromSaved" [(ngModel)]="evolveFromSaved" [ngModelOptions]="{standalone: true}">
-        <label class="form-check-label" for="evolveFromSaved">
-          🧬 Evoluir a partir do melhor salvo
-        </label>
-      </div>
-    </form>
-    
-    <div *ngIf="form.get('queensNumber')?.errors?.['min'] || form.get('queensNumber')?.errors?.['max']" 
-         class="text-danger mt-2">
+    <app-qs-form-controls [form]="form" [isLoading]="isLoading" [algorithmUsed]="algorithmUsed" [minQueens]="MIN_QUEENS"
+      [maxQueens]="MAX_QUEENS" [evolveFromSaved]="evolveFromSaved" [showEvolveFromSaved]="hasSavedResultForCurrentN()"
+      (backtracking)="onSubmit()" (ga)="onSubmitGA()" (nn)="onSubmitNN()" (brain)="onSubmitBrain()"
+      (evolveFromSavedChange)="evolveFromSaved = $event"></app-qs-form-controls>
+
+    <div *ngIf="form.get('queensNumber')?.errors?.['min'] || form.get('queensNumber')?.errors?.['max']"
+      class="text-danger mt-2">
       Por favor, insira um valor entre {{ MIN_QUEENS }} e {{ MAX_QUEENS }}.
     </div>
   </section>
 
-  <!-- Campeões salvos de todos os algoritmos -->
-  <section *ngIf="getAllChampions().length > 0" class="best-results-section mt-4">
-    <div class="best-results-container">
-      <div class="best-results-header">
-        <h5>🏆 Campeões N-Rainhas (salvos)</h5>
-        <button class="btn btn-sm btn-outline-danger" (click)="clearAllResults()">Limpar Todos</button>
-      </div>
-      <div class="best-results-table">
-        <table class="table table-sm table-striped table-hover">
-          <thead>
-            <tr>
-              <th>N</th>
-              <th>Algoritmo</th>
-              <th>Gerações/Iter.</th>
-              <th>Tempo</th>
-              <th>Data</th>
-              <th>Ação</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let result of getAllChampions()">
-              <td><strong>{{ result.n }}</strong></td>
-              <td>
-                <span class="badge" [ngClass]="getAlgorithmBadgeClass(result.algorithm)">
-                  {{ getAlgorithmEmoji(result.algorithm) }} {{ getAlgorithmLabel(result.algorithm) }}
-                </span>
-              </td>
-              <td>
-                <span *ngIf="result.generations !== undefined">{{ result.generations }} ger.</span>
-                <span *ngIf="result.iterations !== undefined">{{ result.iterations }} iter.</span>
-                <span *ngIf="result.generations === undefined && result.iterations === undefined">-</span>
-              </td>
-              <td>{{ result.solveTime }} ms</td>
-              <td>{{ result.date }}</td>
-              <td>
-                <button class="btn btn-sm btn-outline-primary" (click)="loadSavedSolution(result)" title="Ver solução">
-                  👁️ Ver
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </section>
-
   <!-- Loading indicator -->
-  <div *ngIf="isLoading" class="loading mt-4">
-    <div class="spinner"></div>
-    <span *ngIf="algorithmUsed === 'backtracking'">Resolvendo com Backtracking...</span>
-    <span *ngIf="algorithmUsed === 'ga'">Evoluindo população genética...</span>
-    <span *ngIf="algorithmUsed === 'nn'">Treinando rede neural de Hopfield...</span>
-    <span *ngIf="algorithmUsed === 'brain'">Treinando Brain.js neural network...</span>
-  </div>
+  <app-qs-loading-state *ngIf="isLoading" class="mt-4" [isLoading]="isLoading"
+    [algorithmUsed]="algorithmUsed"></app-qs-loading-state>
 
   <!-- No solution message -->
-  <div *ngIf="noSolution && !isLoading" class="message no-solution">
-    <strong>Sem solução!</strong> 
-    Não existe solução para o problema das {{ queensCount }}-rainhas.
-    <br>
-    <small>Dica: Os casos N=2 e N=3 não possuem solução válida.</small>
-  </div>
+  <app-qs-no-solution-alert *ngIf="noSolution && !isLoading" [queensCount]="queensCount"></app-qs-no-solution-alert>
 
   <!-- Solution display - Two column layout -->
   <div *ngIf="solution && !isLoading" class="results-container">
     <div class="results-row">
-      <!-- Coluna do Tabuleiro (primeira coluna) -->
-      <div class="board-column" [class.full-width]="algorithmUsed === 'backtracking' || (algorithmUsed === 'ga' && evolutionHistory.length === 0) || (algorithmUsed === 'nn' && trainingHistory.length === 0) || (algorithmUsed === 'brain' && brainHistory.length === 0)">
-        <div class="board-container">
-          <h5>♛ Solução Encontrada</h5>
-          <div class="stats">
-            <span><strong>Rainhas:</strong> {{ queensCount }}</span>
-            <span><strong>Algoritmo:</strong> 
-              {{ algorithmUsed === 'ga' ? 'Genético' : (algorithmUsed === 'nn' ? 'Rede Neural' : (algorithmUsed === 'brain' ? 'Brain.js' : 'Backtracking')) }}
-            </span>
-            <span *ngIf="algorithmUsed === 'ga'"><strong>Gerações:</strong> {{ generations }}</span>
-            <span *ngIf="algorithmUsed === 'nn' || algorithmUsed === 'brain'"><strong>Iterações:</strong> {{ iterations }}</span>
-            <span><strong>Tempo:</strong> {{ solveTime }} ms</span>
-          </div>
-          
-          <table class="chessboard">
-            <tr *ngFor="let row of solution; let rowIndex = index">
-              <td 
-                *ngFor="let cell of row; let colIndex = index" 
-                [class]="getCellClass(rowIndex, colIndex, cell)">
-              </td>
-            </tr>
-          </table>
-        </div>
+      <div class="board-column"
+        [class.full-width]="algorithmUsed === 'backtracking' || (algorithmUsed === 'ga' && evolutionHistory.length === 0) || (algorithmUsed === 'nn' && trainingHistory.length === 0) || (algorithmUsed === 'brain' && brainHistory.length === 0)">
+        <app-qs-results-board [solution]="solution" [queensCount]="queensCount" [algorithmUsed]="algorithmUsed"
+          [generations]="generations" [iterations]="iterations" [solveTime]="solveTime"></app-qs-results-board>
       </div>
 
-      <!-- Coluna do Gráfico (segunda coluna, para AG, NN e Brain.js) -->
-      <div class="chart-column" *ngIf="(algorithmUsed === 'ga' && evolutionHistory.length > 0) || (algorithmUsed === 'nn' && trainingHistory.length > 0) || (algorithmUsed === 'brain' && brainHistory.length > 0)">
-        <div class="chart-container">
-          <h5 *ngIf="algorithmUsed === 'ga'">📈 Evolução do Algoritmo Genético</h5>
-          <h5 *ngIf="algorithmUsed === 'nn'">🧠 Treinamento da Rede Neural</h5>
-          <h5 *ngIf="algorithmUsed === 'brain'">🔵 Treinamento Brain.js</h5>
-          <canvas #evolutionChart width="450" height="300"></canvas>
-          <div class="chart-info" *ngIf="algorithmUsed === 'ga'">
-            <span><strong>Gerações:</strong> {{ generations }}</span>
-            <span><strong>Fitness Final:</strong> 0 (solução perfeita)</span>
-          </div>
-          <div class="chart-info" *ngIf="algorithmUsed === 'nn'">
-            <span><strong>Iterações:</strong> {{ iterations }}</span>
-            <span><strong>Energia Final:</strong> 0 (solução perfeita)</span>
-          </div>
-          <div class="chart-info" *ngIf="algorithmUsed === 'brain'">
-            <span><strong>Iterações:</strong> {{ iterations }}</span>
-            <span><strong>Erro Final:</strong> {{ brainHistory.length > 0 ? brainHistory[brainHistory.length - 1].error.toFixed(6) : '0' }}</span>
-          </div>
-        </div>
-      </div>
+      <app-qs-training-chart
+        *ngIf="(algorithmUsed === 'ga' && evolutionHistory.length > 0) || (algorithmUsed === 'nn' && trainingHistory.length > 0) || (algorithmUsed === 'brain' && brainHistory.length > 0)"
+        class="chart-column" [algorithmUsed]="algorithmUsed" [evolutionHistory]="evolutionHistory"
+        [trainingHistory]="trainingHistory" [brainHistory]="brainHistory" [generations]="generations"
+        [iterations]="iterations" [queensCount]="queensCount"></app-qs-training-chart>
     </div>
   </div>
+
+  <!-- Campeões salvos de todos os algoritmos -->
+  <app-qs-champions-table *ngIf="getAllChampions().length > 0" class="mt-4" [champions]="getAllChampions()"
+    (viewSolution)="loadSavedSolution($event)" (clearAll)="clearAllResults()"></app-qs-champions-table>
 </div>

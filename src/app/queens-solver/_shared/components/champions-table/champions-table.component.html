@@ -1,0 +1,44 @@
+<section class="best-results-section">
+  <div class="best-results-container">
+    <div class="best-results-header">
+      <h5>🏆 Campeões N-Rainhas (salvos)</h5>
+      <button class="btn btn-sm btn-outline-danger" (click)="onClear()">Limpar Todos</button>
+    </div>
+    <div class="best-results-table">
+      <table class="table table-sm table-striped table-hover">
+        <thead>
+          <tr>
+            <th>N</th>
+            <th>Algoritmo</th>
+            <th>Gerações/Iter.</th>
+            <th>Tempo</th>
+            <th>Data</th>
+            <th>Ação</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let result of champions">
+            <td><strong>{{ result.n }}</strong></td>
+            <td>
+              <span class="badge" [ngClass]="getAlgorithmBadgeClass(result.algorithm)">
+                {{ getAlgorithmEmoji(result.algorithm) }} {{ getAlgorithmLabel(result.algorithm) }}
+              </span>
+            </td>
+            <td>
+              <span *ngIf="result.generations !== undefined">{{ result.generations }} ger.</span>
+              <span *ngIf="result.iterations !== undefined">{{ result.iterations }} iter.</span>
+              <span *ngIf="result.generations === undefined && result.iterations === undefined">-</span>
+            </td>
+            <td>{{ result.solveTime }} ms</td>
+            <td>{{ result.date }}</td>
+            <td>
+              <button class="btn btn-sm btn-outline-primary" (click)="onView(result)" title="Ver solução">
+                👁️ Ver
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
