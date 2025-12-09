@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -9,6 +9,6 @@ import { CommonModule } from '@angular/common';
   styleUrls: ['./loading-state.component.scss']
 })
 export class LoadingStateComponent {
-  @Input() isLoading = false;
-  @Input() algorithmUsed: 'backtracking' | 'ga' | 'nn' | 'brain' | null = null;
+  isLoading = input(false);
+  algorithmUsed = input<'backtracking' | 'ga' | 'nn' | 'brain' | null>(null);
 }

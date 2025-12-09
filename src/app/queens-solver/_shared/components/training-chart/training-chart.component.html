@@ -1,20 +1,36 @@
-<div class="chart-column" *ngIf="(algorithmUsed === 'ga' && evolutionHistory.length > 0) || (algorithmUsed === 'nn' && trainingHistory.length > 0) || (algorithmUsed === 'brain' && brainHistory.length > 0)">
+@if ((algorithmUsed() === 'ga' && evolutionHistory().length > 0) || (algorithmUsed() === 'nn' &&
+trainingHistory().length > 0) || (algorithmUsed() === 'brain' && brainHistory().length > 0)) {
+<div class="chart-column">
   <div class="chart-container">
-    <h5 *ngIf="algorithmUsed === 'ga'">📈 Evolução do Algoritmo Genético</h5>
-    <h5 *ngIf="algorithmUsed === 'nn'">🧠 Treinamento da Rede Neural</h5>
-    <h5 *ngIf="algorithmUsed === 'brain'">🔵 Treinamento Brain.js</h5>
+    @if (algorithmUsed() === 'ga') {
+    <h5>📈 Evolução do Algoritmo Genético</h5>
+    }
+    @if (algorithmUsed() === 'nn') {
+    <h5>🧠 Treinamento da Rede Neural</h5>
+    }
+    @if (algorithmUsed() === 'brain') {
+    <h5>🔵 Treinamento Brain.js</h5>
+    }
     <canvas #evolutionChart width="450" height="300"></canvas>
-    <div class="chart-info" *ngIf="algorithmUsed === 'ga'">
-      <span><strong>Gerações:</strong> {{ generations }}</span>
+    @if (algorithmUsed() === 'ga') {
+    <div class="chart-info">
+      <span><strong>Gerações:</strong> {{ generations() }}</span>
       <span><strong>Fitness Final:</strong> 0 (solução perfeita)</span>
     </div>
-    <div class="chart-info" *ngIf="algorithmUsed === 'nn'">
-      <span><strong>Iterações:</strong> {{ iterations }}</span>
+    }
+    @if (algorithmUsed() === 'nn') {
+    <div class="chart-info">
+      <span><strong>Iterações:</strong> {{ iterations() }}</span>
       <span><strong>Energia Final:</strong> 0 (solução perfeita)</span>
     </div>
-    <div class="chart-info" *ngIf="algorithmUsed === 'brain'">
-      <span><strong>Iterações:</strong> {{ iterations }}</span>
-      <span><strong>Erro Final:</strong> {{ brainHistory.length > 0 ? brainHistory[brainHistory.length - 1].error.toFixed(6) : '0' }}</span>
+    }
+    @if (algorithmUsed() === 'brain') {
+    <div class="chart-info">
+      <span><strong>Iterações:</strong> {{ iterations() }}</span>
+      <span><strong>Erro Final:</strong> {{ brainHistory().length > 0 ? brainHistory()[brainHistory().length -
+        1].error.toFixed(6) : '0' }}</span>
     </div>
+    }
   </div>
 </div>
+}

@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -9,5 +9,5 @@ import { CommonModule } from '@angular/common';
   styleUrls: ['./no-solution-alert.component.scss']
 })
 export class NoSolutionAlertComponent {
-  @Input() queensCount = 0;
+  queensCount = input(0);
 }

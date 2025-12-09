@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ElementRef, Input, OnChanges, SimpleChanges, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, ViewChild, input, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -8,38 +8,45 @@ import { CommonModule } from '@angular/common';
   templateUrl: './training-chart.component.html',
   styleUrls: ['./training-chart.component.scss']
 })
-export class TrainingChartComponent implements AfterViewInit, OnChanges {
-  @Input() algorithmUsed: 'backtracking' | 'ga' | 'nn' | 'brain' | null = null;
-  @Input() evolutionHistory: { generation: number; bestFitness: number; avgFitness: number }[] = [];
-  @Input() trainingHistory: { iteration: number; energy: number; validQueens: number }[] = [];
-  @Input() brainHistory: { iteration: number; error: number; validQueens: number }[] = [];
-  @Input() generations = 0;
-  @Input() iterations = 0;
-  @Input() queensCount = 0;
+export class TrainingChartComponent implements AfterViewInit {
+  algorithmUsed = input<'backtracking' | 'ga' | 'nn' | 'brain' | null>(null);
+  evolutionHistory = input<{ generation: number; bestFitness: number; avgFitness: number }[]>([]);
+  trainingHistory = input<{ iteration: number; energy: number; validQueens: number }[]>([]);
+  brainHistory = input<{ iteration: number; error: number; validQueens: number }[]>([]);
+  generations = input(0);
+  iterations = input(0);
+  queensCount = input(0);
 
   @ViewChild('evolutionChart') chartCanvas?: ElementRef<HTMLCanvasElement>;
 
   private viewReady = false;
+
+  constructor() {
+    effect(() => {
+      // Register dependencies
+      this.algorithmUsed();
+      this.evolutionHistory();
+      this.trainingHistory();
+      this.brainHistory();
+      
+      this.renderChart();
+    });
+  }
 
   ngAfterViewInit(): void {
     this.viewReady = true;
     this.renderChart();
   }
 
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes['algorithmUsed'] || changes['evolutionHistory'] || changes['trainingHistory'] || changes['brainHistory']) {
-      this.renderChart();
-    }
-  }
-
   private renderChart(): void {
     if (!this.viewReady || !this.chartCanvas) return;
 
-    if (this.algorithmUsed === 'ga' && this.evolutionHistory.length > 0) {
+    const algo = this.algorithmUsed();
+    if (algo === 'ga' && this.evolutionHistory().length > 0) {
       this.drawGAChart();
-    } else if (this.algorithmUsed === 'nn' && this.trainingHistory.length > 0) {
+    } else if (algo === 'nn' && this.trainingHistory().length > 0) {
       this.drawNNChart();
-    } else if (this.algorithmUsed === 'brain' && this.brainHistory.length > 0) {
+    } else if (algo === 'brain' && this.brainHistory().length > 0) {
       this.drawBrainChart();
     } else {
       this.clearChart();
@@ -55,7 +62,7 @@ export class TrainingChartComponent implements AfterViewInit, OnChanges {
   }
 
   private drawGAChart(): void {
-    if (!this.chartCanvas || this.evolutionHistory.length === 0) return;
+    if (!this.chartCanvas || this.evolutionHistory().length === 0) return;
 
     const canvas = this.chartCanvas.nativeElement;
     const ctx = canvas.getContext('2d');
@@ -70,7 +77,7 @@ export class TrainingChartComponent implements AfterViewInit, OnChanges {
     ctx.fillStyle = '#ffffff';
     ctx.fillRect(0, 0, width, height);
 
-    const data = this.evolutionHistory;
+    const data = this.evolutionHistory();
     const maxFitness = Math.max(...data.map(d => Math.max(d.bestFitness, d.avgFitness)), 1);
     const maxGen = data.length;
 
@@ -172,7 +179,7 @@ export class TrainingChartComponent implements AfterViewInit, OnChanges {
   }
 
   private drawNNChart(): void {
-    if (!this.chartCanvas || this.trainingHistory.length === 0) return;
+    if (!this.chartCanvas || this.trainingHistory().length === 0) return;
 
     const canvas = this.chartCanvas.nativeElement;
     const ctx = canvas.getContext('2d');
@@ -187,7 +194,7 @@ export class TrainingChartComponent implements AfterViewInit, OnChanges {
     ctx.fillStyle = '#ffffff';
     ctx.fillRect(0, 0, width, height);
 
-    const data = this.trainingHistory;
+    const data = this.trainingHistory();
     const maxEnergy = Math.max(...data.map(d => d.energy), 1);
     const maxIter = data.length;
 
@@ -247,7 +254,7 @@ export class TrainingChartComponent implements AfterViewInit, OnChanges {
     });
     ctx.stroke();
 
-    const maxQueens = this.queensCount || 1;
+    const maxQueens = this.queensCount() || 1;
     ctx.strokeStyle = '#ff9800';
     ctx.lineWidth = 2;
     ctx.setLineDash([5, 5]);
@@ -291,7 +298,7 @@ export class TrainingChartComponent implements AfterViewInit, OnChanges {
   }
 
   private drawBrainChart(): void {
-    if (!this.chartCanvas || this.brainHistory.length === 0) return;
+    if (!this.chartCanvas || this.brainHistory().length === 0) return;
 
     const canvas = this.chartCanvas.nativeElement;
     const ctx = canvas.getContext('2d');
@@ -306,7 +313,7 @@ export class TrainingChartComponent implements AfterViewInit, OnChanges {
     ctx.fillStyle = '#ffffff';
     ctx.fillRect(0, 0, width, height);
 
-    const data = this.brainHistory;
+    const data = this.brainHistory();
     const maxError = Math.max(...data.map(d => d.error), 0.1);
     const maxIter = data.length;
 
@@ -366,7 +373,7 @@ export class TrainingChartComponent implements AfterViewInit, OnChanges {
     });
     ctx.stroke();
 
-    const maxQueens = this.queensCount || 1;
+    const maxQueens = this.queensCount() || 1;
     ctx.strokeStyle = '#4caf50';
     ctx.lineWidth = 2;
     ctx.setLineDash([5, 5]);
