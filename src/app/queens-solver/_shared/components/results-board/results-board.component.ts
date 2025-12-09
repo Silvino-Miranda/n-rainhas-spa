@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -9,12 +9,12 @@ import { CommonModule } from '@angular/common';
   styleUrls: ['./results-board.component.scss']
 })
 export class ResultsBoardComponent {
-  @Input() solution: number[][] | null = null;
-  @Input() queensCount = 0;
-  @Input() algorithmUsed: 'backtracking' | 'ga' | 'nn' | 'brain' | null = null;
-  @Input() generations = 0;
-  @Input() iterations = 0;
-  @Input() solveTime = 0;
+  solution = input<number[][] | null>(null);
+  queensCount = input(0);
+  algorithmUsed = input<'backtracking' | 'ga' | 'nn' | 'brain' | null>(null);
+  generations = input(0);
+  iterations = input(0);
+  solveTime = input(0);
 
   getCellClass(rowIndex: number, colIndex: number, cellValue: number): string {
     const isLight = (rowIndex + colIndex) % 2 === 0;
@@ -23,9 +23,10 @@ export class ResultsBoardComponent {
   }
 
   getAlgorithmLabel(): string {
-    if (this.algorithmUsed === 'ga') return 'Genético';
-    if (this.algorithmUsed === 'nn') return 'Rede Neural';
-    if (this.algorithmUsed === 'brain') return 'Brain.js';
+    const algo = this.algorithmUsed();
+    if (algo === 'ga') return 'Genético';
+    if (algo === 'nn') return 'Rede Neural';
+    if (algo === 'brain') return 'Brain.js';
     return 'Backtracking';
   }
 }

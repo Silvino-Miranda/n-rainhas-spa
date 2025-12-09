@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, input, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ChampionResult, AlgorithmType } from '../../services/local-storage.service';
 
@@ -10,9 +10,9 @@ import { ChampionResult, AlgorithmType } from '../../services/local-storage.serv
   styleUrls: ['./champions-table.component.scss']
 })
 export class ChampionsTableComponent {
-  @Input() champions: ChampionResult[] = [];
-  @Output() viewSolution = new EventEmitter<ChampionResult>();
-  @Output() clearAll = new EventEmitter<void>();
+  champions = input<ChampionResult[]>([]);
+  viewSolution = output<ChampionResult>();
+  clearAll = output<void>();
 
   onView(result: ChampionResult): void {
     this.viewSolution.emit(result);

@@ -1,6 +1,6 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, input, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule, ReactiveFormsModule, UntypedFormGroup } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule, FormGroup } from '@angular/forms';
 
 @Component({
   selector: 'app-qs-form-controls',
@@ -10,19 +10,19 @@ import { FormsModule, ReactiveFormsModule, UntypedFormGroup } from '@angular/for
   styleUrls: ['./form-controls.component.scss']
 })
 export class FormControlsComponent {
-  @Input() form!: UntypedFormGroup;
-  @Input() isLoading = false;
-  @Input() algorithmUsed: 'backtracking' | 'ga' | 'nn' | 'brain' | null = null;
-  @Input() minQueens = 1;
-  @Input() maxQueens = 15;
-  @Input() evolveFromSaved = true;
-  @Input() showEvolveFromSaved = false;
+  form = input.required<FormGroup>();
+  isLoading = input(false);
+  algorithmUsed = input<'backtracking' | 'ga' | 'nn' | 'brain' | null>(null);
+  minQueens = input(1);
+  maxQueens = input(15);
+  evolveFromSaved = input(true);
+  showEvolveFromSaved = input(false);
 
-  @Output() backtracking = new EventEmitter<void>();
-  @Output() ga = new EventEmitter<void>();
-  @Output() nn = new EventEmitter<void>();
-  @Output() brain = new EventEmitter<void>();
-  @Output() evolveFromSavedChange = new EventEmitter<boolean>();
+  backtracking = output<void>();
+  ga = output<void>();
+  nn = output<void>();
+  brain = output<void>();
+  evolveFromSavedChange = output<boolean>();
 
   onBacktracking(): void {
     this.backtracking.emit();

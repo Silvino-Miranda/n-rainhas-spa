@@ -17,7 +17,8 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let result of champions">
+          @for (result of champions(); track result.date) {
+          <tr>
             <td><strong>{{ result.n }}</strong></td>
             <td>
               <span class="badge" [ngClass]="getAlgorithmBadgeClass(result.algorithm)">
@@ -25,9 +26,15 @@
               </span>
             </td>
             <td>
-              <span *ngIf="result.generations !== undefined">{{ result.generations }} ger.</span>
-              <span *ngIf="result.iterations !== undefined">{{ result.iterations }} iter.</span>
-              <span *ngIf="result.generations === undefined && result.iterations === undefined">-</span>
+              @if (result.generations !== undefined) {
+              <span>{{ result.generations }} ger.</span>
+              }
+              @if (result.iterations !== undefined) {
+              <span>{{ result.iterations }} iter.</span>
+              }
+              @if (result.generations === undefined && result.iterations === undefined) {
+              <span>-</span>
+              }
             </td>
             <td>{{ result.solveTime }} ms</td>
             <td>{{ result.date }}</td>
@@ -37,6 +44,7 @@
               </button>
             </td>
           </tr>
+          }
         </tbody>
       </table>
     </div>

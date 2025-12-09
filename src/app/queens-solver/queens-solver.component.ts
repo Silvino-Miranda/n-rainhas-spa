@@ -1,6 +1,13 @@
-import { Component } from '@angular/core';
+import { Component, inject, signal, WritableSignal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormsModule, UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
+import {
+  ReactiveFormsModule,
+  FormsModule,
+  FormBuilder,
+  FormGroup,
+  Validators,
+  FormControl
+} from '@angular/forms';
 import { QueensSolverService } from './_shared/services/queens-solver.service';
 import { QueensSolverGaService } from './_shared/services/queens-solver-ga.service';
 import { QueensSolverNnService } from './_shared/services/queens-solver-nn.service';
@@ -31,51 +38,47 @@ import { TrainingChartComponent } from './_shared/components/training-chart/trai
   styleUrls: ['./queens-solver.component.scss']
 })
 export class QueensSolverComponent {
-  form: UntypedFormGroup;
-  
-  // Estado da aplicação
-  solution: number[][] | null = null;
-  isLoading = false;
-  noSolution = false;
-  solveTime = 0;
-  queensCount = 0;
-  
+  private formBuilder = inject(FormBuilder);
+  private queensSolver = inject(QueensSolverService);
+  private queensSolverGa = inject(QueensSolverGaService);
+  private queensSolverNn = inject(QueensSolverNnService);
+  private queensSolverBrain = inject(QueensSolverBrainService);
+  private localStorage = inject(LocalStorageService);
+
+  form: FormGroup<{ queensNumber: FormControl<number | null> }>;
+
+  // Estado da aplicação com Signals
+  solution: WritableSignal<number[][] | null> = signal(null);
+  isLoading: WritableSignal<boolean> = signal(false);
+  noSolution: WritableSignal<boolean> = signal(false);
+  solveTime: WritableSignal<number> = signal(0);
+  queensCount: WritableSignal<number> = signal(0);
+
   // Propriedades para AG
-  generations = 0;
-  algorithmUsed: 'backtracking' | 'ga' | 'nn' | 'brain' | null = null;
-  evolutionHistory: { generation: number; bestFitness: number; avgFitness: number }[] = [];
-  evolveFromSaved = true; // Checkbox para evoluir a partir do resultado salvo
-  
+  generations: WritableSignal<number> = signal(0);
+  algorithmUsed: WritableSignal<'backtracking' | 'ga' | 'nn' | 'brain' | null> = signal(null);
+  evolutionHistory: WritableSignal<{ generation: number; bestFitness: number; avgFitness: number }[]> = signal([]);
+  evolveFromSaved: WritableSignal<boolean> = signal(true);
+
   // Propriedades para Rede Neural
-  iterations = 0;
-  trainingHistory: { iteration: number; energy: number; validQueens: number }[] = [];
-  
+  iterations: WritableSignal<number> = signal(0);
+  trainingHistory: WritableSignal<{ iteration: number; energy: number; validQueens: number }[]> = signal([]);
+
   // Propriedades para Brain.js
-  brainHistory: { iteration: number; error: number; validQueens: number }[] = [];
+  brainHistory: WritableSignal<{ iteration: number; error: number; validQueens: number }[]> = signal([]);
 
   // Limites para o número de rainhas
   readonly MIN_QUEENS = 1;
-  readonly MAX_QUEENS = 15; // Limitar para evitar travamento do navegador
+  readonly MAX_QUEENS = 15;
 
-  constructor(
-    private formBuilder: UntypedFormBuilder,
-    private queensSolver: QueensSolverService,
-    private queensSolverGa: QueensSolverGaService,
-    private queensSolverNn: QueensSolverNnService,
-    private queensSolverBrain: QueensSolverBrainService,
-    private localStorage: LocalStorageService
-  ) {
+  constructor() {
     this.form = this.formBuilder.group({
       queensNumber: [
-        4, // valor padrão
-        [
-          Validators.required,
-          Validators.min(this.MIN_QUEENS),
-          Validators.max(this.MAX_QUEENS)
-        ]
+        4,
+        [Validators.required, Validators.min(this.MIN_QUEENS), Validators.max(this.MAX_QUEENS)]
       ]
     });
-    
+
     // Migrar dados do formato antigo (se existirem)
     this.localStorage.migrateFromOldFormat();
   }
@@ -86,7 +89,9 @@ export class QueensSolverComponent {
     }
 
     const queensNumber = this.form.get('queensNumber')?.value;
-    this.solve(queensNumber);
+    if (queensNumber) {
+      this.solve(queensNumber);
+    }
   }
 
   onSubmitGA(): void {
@@ -95,7 +100,9 @@ export class QueensSolverComponent {
     }
 
     const queensNumber = this.form.get('queensNumber')?.value;
-    this.solveWithGA(queensNumber);
+    if (queensNumber) {
+      this.solveWithGA(queensNumber);
+    }
   }
 
   onSubmitNN(): void {
@@ -104,7 +111,9 @@ export class QueensSolverComponent {
     }
 
     const queensNumber = this.form.get('queensNumber')?.value;
-    this.solveWithNN(queensNumber);
+    if (queensNumber) {
+      this.solveWithNN(queensNumber);
+    }
   }
 
   onSubmitBrain(): void {
@@ -113,147 +122,140 @@ export class QueensSolverComponent {
     }
 
     const queensNumber = this.form.get('queensNumber')?.value;
-    this.solveWithBrain(queensNumber);
+    if (queensNumber) {
+      this.solveWithBrain(queensNumber);
+    }
   }
 
   solve(n: number): void {
     this.resetState(n);
-    this.algorithmUsed = 'backtracking';
-    this.evolutionHistory = [];
+    this.algorithmUsed.set('backtracking');
+    this.evolutionHistory.set([]);
 
-    // Usar setTimeout para permitir que a UI atualize antes de resolver
     setTimeout(() => {
       const startTime = performance.now();
       const result = this.queensSolver.solve(n);
       const endTime = performance.now();
-      
-      this.solveTime = Math.round((endTime - startTime) * 100) / 100;
-      this.isLoading = false;
-      this.generations = 0;
+
+      this.solveTime.set(Math.round((endTime - startTime) * 100) / 100);
+      this.isLoading.set(false);
+      this.generations.set(0);
 
       if (result) {
-        this.solution = result;
-        this.noSolution = false;
-        
-        // Salvar campeão no localStorage
-        this.saveChampion('backtracking', n, this.solveTime, result);
+        this.solution.set(result);
+        this.noSolution.set(false);
+        this.saveChampion('backtracking', n, this.solveTime(), result);
       } else {
-        this.solution = null;
-        this.noSolution = true;
+        this.solution.set(null);
+        this.noSolution.set(true);
       }
     }, 10);
   }
 
   solveWithGA(n: number): void {
     this.resetState(n);
-    this.algorithmUsed = 'ga';
+    this.algorithmUsed.set('ga');
 
     setTimeout(() => {
-      // Recuperar o melhor indivíduo salvo para este N (se a opção estiver marcada)
-      const savedResult = this.evolveFromSaved ? this.getGAChampionForN(n) : null;
+      const savedResult = this.evolveFromSaved() ? this.getGAChampionForN(n) : null;
       const initialBoard = savedResult?.board || undefined;
-      
+
       const startTime = performance.now();
       const result = this.queensSolverGa.solve(n, initialBoard);
       const endTime = performance.now();
-      
-      this.solveTime = Math.round((endTime - startTime) * 100) / 100;
-      this.isLoading = false;
+
+      this.solveTime.set(Math.round((endTime - startTime) * 100) / 100);
+      this.isLoading.set(false);
 
       if (result) {
-        this.solution = result.board;
-        this.generations = result.generations;
-        this.evolutionHistory = result.evolutionHistory;
-        this.noSolution = false;
-        
-        // Salvar campeão no localStorage
-        this.saveChampion('ga', n, this.solveTime, result.board, result.generations);
-        
+        this.solution.set(result.board);
+        this.generations.set(result.generations);
+        this.evolutionHistory.set(result.evolutionHistory);
+        this.noSolution.set(false);
+        this.saveChampion('ga', n, this.solveTime(), result.board, result.generations);
       } else {
-        this.solution = null;
-        this.generations = 0;
-        this.evolutionHistory = [];
-        this.noSolution = true;
+        this.solution.set(null);
+        this.generations.set(0);
+        this.evolutionHistory.set([]);
+        this.noSolution.set(true);
       }
     }, 10);
   }
 
   solveWithNN(n: number): void {
     this.resetState(n);
-    this.algorithmUsed = 'nn';
+    this.algorithmUsed.set('nn');
 
     setTimeout(() => {
       const startTime = performance.now();
       const result = this.queensSolverNn.solve(n);
       const endTime = performance.now();
-      
-      this.solveTime = Math.round((endTime - startTime) * 100) / 100;
-      this.isLoading = false;
+
+      this.solveTime.set(Math.round((endTime - startTime) * 100) / 100);
+      this.isLoading.set(false);
 
       if (result) {
-        this.solution = result.board;
-        this.iterations = result.iterations;
-        this.trainingHistory = result.trainingHistory;
-        this.noSolution = false;
-        
-        // Salvar campeão no localStorage
-        this.saveChampion('nn', n, this.solveTime, result.board, undefined, result.iterations);
-        
+        this.solution.set(result.board);
+        this.iterations.set(result.iterations);
+        this.trainingHistory.set(result.trainingHistory);
+        this.noSolution.set(false);
+        this.saveChampion('nn', n, this.solveTime(), result.board, undefined, result.iterations);
       } else {
-        this.solution = null;
-        this.iterations = 0;
-        this.trainingHistory = [];
-        this.noSolution = true;
+        this.solution.set(null);
+        this.iterations.set(0);
+        this.trainingHistory.set([]);
+        this.noSolution.set(true);
       }
     }, 10);
   }
 
   solveWithBrain(n: number): void {
     this.resetState(n);
-    this.algorithmUsed = 'brain';
+    this.algorithmUsed.set('brain');
 
     setTimeout(() => {
       const startTime = performance.now();
       const result = this.queensSolverBrain.solve(n);
       const endTime = performance.now();
-      
-      this.solveTime = Math.round((endTime - startTime) * 100) / 100;
-      this.isLoading = false;
+
+      this.solveTime.set(Math.round((endTime - startTime) * 100) / 100);
+      this.isLoading.set(false);
 
       if (result) {
-        this.solution = result.board;
-        this.iterations = result.iterations;
-        this.brainHistory = result.trainingHistory;
-        this.noSolution = false;
-        
-        // Salvar campeão no localStorage
-        this.saveChampion('brain', n, this.solveTime, result.board, undefined, result.iterations);
-        
+        this.solution.set(result.board);
+        this.iterations.set(result.iterations);
+        this.brainHistory.set(result.trainingHistory);
+        this.noSolution.set(false);
+        this.saveChampion('brain', n, this.solveTime(), result.board, undefined, result.iterations);
       } else {
-        this.solution = null;
-        this.iterations = 0;
-        this.brainHistory = [];
-        this.noSolution = true;
+        this.solution.set(null);
+        this.iterations.set(0);
+        this.brainHistory.set([]);
+        this.noSolution.set(true);
       }
     }, 10);
   }
 
   private resetState(n: number): void {
-    this.solution = null;
-    this.noSolution = false;
-    this.isLoading = true;
-    this.queensCount = n;
-    this.generations = 0;
-    this.evolutionHistory = [];
-    this.iterations = 0;
-    this.trainingHistory = [];
-    this.brainHistory = [];
+    this.solution.set(null);
+    this.noSolution.set(false);
+    this.isLoading.set(true);
+    this.queensCount.set(n);
+    this.generations.set(0);
+    this.evolutionHistory.set([]);
+    this.iterations.set(0);
+    this.trainingHistory.set([]);
+    this.brainHistory.set([]);
   }
 
-  /**
-   * Salva um campeão no localStorage
-   */
-  private saveChampion(algorithm: AlgorithmType, n: number, solveTime: number, board: number[][], generations?: number, iterations?: number): void {
+  private saveChampion(
+    algorithm: AlgorithmType,
+    n: number,
+    solveTime: number,
+    board: number[][],
+    generations?: number,
+    iterations?: number
+  ): void {
     const champion: ChampionResult = {
       n,
       algorithm,
@@ -263,113 +265,81 @@ export class QueensSolverComponent {
       ...(generations !== undefined && { generations }),
       ...(iterations !== undefined && { iterations })
     };
-    
+
     this.localStorage.saveChampion(champion);
   }
 
-  /**
-   * Obtém todos os campeões para exibição na tabela
-   */
   getAllChampions(): ChampionResult[] {
     return this.localStorage.getAllChampions();
   }
 
-  /**
-   * Obtém campeões de um algoritmo específico
-   */
   getChampionsByAlgorithm(algorithm: AlgorithmType): ChampionResult[] {
     return this.localStorage.getChampionsByAlgorithm(algorithm);
   }
 
-  /**
-   * Carrega uma solução salva para exibição
-   */
   loadSavedSolution(result: ChampionResult): void {
-    this.solution = result.board;
-    this.queensCount = result.n;
-    this.algorithmUsed = result.algorithm;
-    this.solveTime = result.solveTime;
-    this.noSolution = false;
-    
+    this.solution.set(result.board);
+    this.queensCount.set(result.n);
+    this.algorithmUsed.set(result.algorithm);
+    this.solveTime.set(result.solveTime);
+    this.noSolution.set(false);
+
     if (result.generations !== undefined) {
-      this.generations = result.generations;
+      this.generations.set(result.generations);
     }
     if (result.iterations !== undefined) {
-      this.iterations = result.iterations;
+      this.iterations.set(result.iterations);
     }
-    
-    // Limpar históricos já que não temos salvos
-    this.evolutionHistory = [];
-    this.trainingHistory = [];
-    this.brainHistory = [];
+
+    this.evolutionHistory.set([]);
+    this.trainingHistory.set([]);
+    this.brainHistory.set([]);
   }
 
-  /**
-   * Limpa todos os resultados salvos
-   */
   clearAllResults(): void {
     this.localStorage.clearAll();
   }
 
-  /**
-   * Remove campeões de um algoritmo específico
-   */
   clearAlgorithmResults(algorithm: AlgorithmType): void {
     this.localStorage.clearAlgorithmChampions(algorithm);
   }
 
-  /**
-   * Verifica se existe um resultado salvo do GA para o N atual do formulário
-   */
   hasSavedResultForCurrentN(): boolean {
     const n = this.form.get('queensNumber')?.value;
     return n ? this.localStorage.hasChampion('ga', n) : false;
   }
 
-  /**
-   * Obtém o campeão GA para um N específico (para evoluir a partir dele)
-   */
   private getGAChampionForN(n: number): ChampionResult | null {
     return this.localStorage.getChampion('ga', n);
   }
 
-  /**
-   * Retorna o nome amigável do algoritmo
-   */
   getAlgorithmLabel(algorithm: AlgorithmType): string {
     const labels: { [key in AlgorithmType]: string } = {
-      'backtracking': 'Backtracking',
-      'ga': 'Genético',
-      'nn': 'Rede Neural',
-      'brain': 'Brain.js'
+      backtracking: 'Backtracking',
+      ga: 'Genético',
+      nn: 'Rede Neural',
+      brain: 'Brain.js'
     };
     return labels[algorithm] || algorithm;
   }
 
-  /**
-   * Retorna o emoji do algoritmo
-   */
   getAlgorithmEmoji(algorithm: AlgorithmType): string {
     const emojis: { [key in AlgorithmType]: string } = {
-      'backtracking': '♟️',
-      'ga': '🧬',
-      'nn': '🧠',
-      'brain': '🔵'
+      backtracking: '♟️',
+      ga: '🧬',
+      nn: '🧠',
+      brain: '🔵'
     };
     return emojis[algorithm] || '❓';
   }
 
-  /**
-   * Retorna a classe CSS para a badge do algoritmo
-   */
   getAlgorithmBadgeClass(algorithm: AlgorithmType): string {
     const classes: { [key in AlgorithmType]: string } = {
-      'backtracking': 'bg-secondary',
-      'ga': 'bg-success',
-      'nn': 'bg-warning text-dark',
-      'brain': 'bg-info'
+      backtracking: 'bg-secondary',
+      ga: 'bg-success',
+      nn: 'bg-warning text-dark',
+      brain: 'bg-info'
     };
     return classes[algorithm] || 'bg-secondary';
   }
-
 }
