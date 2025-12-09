@@ -1,9 +1,9 @@
 import { Component } from '@angular/core';
 import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
 import { QueensSolverService } from './_shared/services/queens-solver.service';
-import { QueensSolverGaService, GAResult } from './_shared/services/queens-solver-ga.service';
-import { QueensSolverNnService, NNResult } from './_shared/services/queens-solver-nn.service';
-import { QueensSolverBrainService, BrainResult } from './_shared/services/queens-solver-brain.service';
+import { QueensSolverGaService } from './_shared/services/queens-solver-ga.service';
+import { QueensSolverNnService } from './_shared/services/queens-solver-nn.service';
+import { QueensSolverBrainService } from './_shared/services/queens-solver-brain.service';
 import { LocalStorageService, ChampionResult, AlgorithmType } from './_shared/services/local-storage.service';
 
 @Component({
