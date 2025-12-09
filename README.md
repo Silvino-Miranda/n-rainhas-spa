@@ -2,6 +2,8 @@
 
 Aplicação Angular que resolve o problema das N-Rainhas utilizando quatro algoritmos distintos, com visualização interativa do tabuleiro e gráficos de evolução/treinamento.
 
+![N-Rainhas SPA Home](src/assets/home.png)
+
 ## ⚡ Tecnologias Modernas (Angular 21)
 
 Esta aplicação foi refatorada para utilizar os recursos mais recentes do Angular:
