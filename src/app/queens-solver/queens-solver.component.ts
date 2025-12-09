@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
 import { QueensSolverService } from './_shared/services/queens-solver.service';
 import { QueensSolverGaService, GAResult } from './_shared/services/queens-solver-ga.service';
 import { QueensSolverNnService, NNResult } from './_shared/services/queens-solver-nn.service';
@@ -12,7 +12,7 @@ import { LocalStorageService, ChampionResult, AlgorithmType } from './_shared/se
   styleUrls: ['./queens-solver.component.scss']
 })
 export class QueensSolverComponent {
-  form: FormGroup;
+  form: UntypedFormGroup;
   
   // Estado da aplicação
   solution: number[][] | null = null;
@@ -39,7 +39,7 @@ export class QueensSolverComponent {
   readonly MAX_QUEENS = 15; // Limitar para evitar travamento do navegador
 
   constructor(
-    private formBuilder: FormBuilder,
+    private formBuilder: UntypedFormBuilder,
     private queensSolver: QueensSolverService,
     private queensSolverGa: QueensSolverGaService,
     private queensSolverNn: QueensSolverNnService,

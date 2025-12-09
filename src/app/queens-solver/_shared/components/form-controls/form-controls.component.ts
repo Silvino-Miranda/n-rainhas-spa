@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { FormGroup } from '@angular/forms';
+import { UntypedFormGroup } from '@angular/forms';
 
 @Component({
   selector: 'app-qs-form-controls',
@@ -7,7 +7,7 @@ import { FormGroup } from '@angular/forms';
   styleUrls: ['./form-controls.component.scss']
 })
 export class FormControlsComponent {
-  @Input() form!: FormGroup;
+  @Input() form!: UntypedFormGroup;
   @Input() isLoading = false;
   @Input() algorithmUsed: 'backtracking' | 'ga' | 'nn' | 'brain' | null = null;
   @Input() minQueens = 1;
