@@ -1,8 +1,11 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { UntypedFormGroup } from '@angular/forms';
+import { CommonModule } from '@angular/common';
+import { FormsModule, ReactiveFormsModule, UntypedFormGroup } from '@angular/forms';
 
 @Component({
   selector: 'app-qs-form-controls',
+  standalone: true,
+  imports: [CommonModule, FormsModule, ReactiveFormsModule],
   templateUrl: './form-controls.component.html',
   styleUrls: ['./form-controls.component.scss']
 })

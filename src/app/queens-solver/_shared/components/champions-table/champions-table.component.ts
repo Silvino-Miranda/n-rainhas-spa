@@ -1,8 +1,11 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { ChampionResult, AlgorithmType } from '../../services/local-storage.service';
 
 @Component({
   selector: 'app-qs-champions-table',
+  standalone: true,
+  imports: [CommonModule],
   templateUrl: './champions-table.component.html',
   styleUrls: ['./champions-table.component.scss']
 })

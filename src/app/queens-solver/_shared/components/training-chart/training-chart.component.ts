@@ -1,7 +1,10 @@
 import { AfterViewInit, Component, ElementRef, Input, OnChanges, SimpleChanges, ViewChild } from '@angular/core';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-qs-training-chart',
+  standalone: true,
+  imports: [CommonModule],
   templateUrl: './training-chart.component.html',
   styleUrls: ['./training-chart.component.scss']
 })

@@ -1,13 +1,32 @@
 import { Component } from '@angular/core';
-import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
+import { CommonModule } from '@angular/common';
+import { ReactiveFormsModule, FormsModule, UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
 import { QueensSolverService } from './_shared/services/queens-solver.service';
 import { QueensSolverGaService } from './_shared/services/queens-solver-ga.service';
 import { QueensSolverNnService } from './_shared/services/queens-solver-nn.service';
 import { QueensSolverBrainService } from './_shared/services/queens-solver-brain.service';
 import { LocalStorageService, ChampionResult, AlgorithmType } from './_shared/services/local-storage.service';
+import { FormControlsComponent } from './_shared/components/form-controls/form-controls.component';
+import { ChampionsTableComponent } from './_shared/components/champions-table/champions-table.component';
+import { LoadingStateComponent } from './_shared/components/loading-state/loading-state.component';
+import { NoSolutionAlertComponent } from './_shared/components/no-solution-alert/no-solution-alert.component';
+import { ResultsBoardComponent } from './_shared/components/results-board/results-board.component';
+import { TrainingChartComponent } from './_shared/components/training-chart/training-chart.component';
 
 @Component({
   selector: 'app-queens-solver',
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    FormsModule,
+    FormControlsComponent,
+    ChampionsTableComponent,
+    LoadingStateComponent,
+    NoSolutionAlertComponent,
+    ResultsBoardComponent,
+    TrainingChartComponent
+  ],
   templateUrl: './queens-solver.component.html',
   styleUrls: ['./queens-solver.component.scss']
 })
