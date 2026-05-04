@@ -1,0 +1,70 @@
+<section class="nq-form-controls" aria-label="Configuração do solver">
+  <div class="nq-form-controls__header">
+    <div class="nq-form-controls__field">
+      <label for="nq-n-input" class="nq-form-controls__label">Número de rainhas (N)</label>
+      <div class="nq-form-controls__stepper" role="group" aria-label="Selecionar N">
+        <button type="button" class="nq-form-controls__step" (click)="step(-1)" aria-label="Diminuir N" [disabled]="isRunning() || n() <= 1">
+          <lucide-icon [name]="minusIcon" [size]="18" aria-hidden="true"></lucide-icon>
+        </button>
+        <input
+          id="nq-n-input"
+          type="number"
+          class="nq-form-controls__input"
+          [value]="n()"
+          [min]="1"
+          [max]="15"
+          [attr.aria-invalid]="invalid()"
+          [attr.aria-describedby]="invalid() ? 'nq-n-error' : null"
+          (input)="updateN(($any($event.target)).value)"
+          [disabled]="isRunning()"
+          inputmode="numeric"
+        />
+        <button type="button" class="nq-form-controls__step" (click)="step(1)" aria-label="Aumentar N" [disabled]="isRunning() || n() >= 15">
+          <lucide-icon [name]="plusIcon" [size]="18" aria-hidden="true"></lucide-icon>
+        </button>
+      </div>
+      @if (invalid()) {
+        <p id="nq-n-error" class="nq-form-controls__error" role="alert">{{ errorMessage() }}</p>
+      } @else {
+        <p class="nq-form-controls__hint">Faixa válida: 1 a 15. Não há solução para N=2 ou N=3.</p>
+      }
+    </div>
+
+    <button
+      type="button"
+      class="nq-form-controls__demo"
+      (click)="demo.emit()"
+      [disabled]="isRunning() || invalid()"
+    >
+      <lucide-icon [name]="demoIcon" [size]="16" aria-hidden="true"></lucide-icon>
+      Rodar demo (todos)
+    </button>
+  </div>
+
+  @if (hasSeed()) {
+    <label class="nq-form-controls__seed">
+      <input
+        type="checkbox"
+        [checked]="evolveFromSeed()"
+        (change)="evolveFromSeedChange.emit(($any($event.target)).checked)"
+        [disabled]="isRunning()"
+      />
+      <span>Evoluir AG a partir do melhor campeão salvo para N={{ n() }}</span>
+    </label>
+  }
+
+  <div class="nq-algo-grid" role="list">
+    @for (algo of algorithms; track algo) {
+      <div role="listitem">
+        <app-algorithm-card
+          [algorithm]="algo"
+          [isRunning]="isAlgorithmRunning(algo)"
+          [disabled]="isAlgorithmDisabled(algo)"
+          [progress]="isAlgorithmRunning(algo) ? progress() : 0"
+          (run)="dispatchRun($event)"
+          (cancel)="cancel.emit($event)"
+        />
+      </div>
+    }
+  </div>
+</section>

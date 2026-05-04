@@ -1,0 +1,69 @@
+<div class="nq-solver nq-content-grid">
+  <header class="nq-solver__hero">
+    <span class="nq-solver__eyebrow">Bancada de comparação</span>
+    <h1 class="nq-solver__title">Resolver N-Rainhas com 4 estratégias</h1>
+    <p class="nq-solver__lead">
+      Escolha N entre 1 e 15 e execute backtracking, algoritmo genético, rede de Hopfield híbrida
+      ou Brain.js. Cada execução roda em um Web Worker dedicado — a UI nunca trava.
+    </p>
+  </header>
+
+  <app-form-controls
+    [n]="store.n()"
+    [isRunning]="store.isRunning()"
+    [runningAlgorithm]="store.algorithm()"
+    [progress]="store.progress()"
+    [hasSeed]="seedExists()"
+    [evolveFromSeed]="evolveFromSeed()"
+    (nChange)="onNChange($event)"
+    (run)="onRun($event)"
+    (cancel)="onCancel()"
+    (evolveFromSeedChange)="evolveFromSeed.set($event)"
+    (demo)="onDemo()"
+  />
+
+  <section class="nq-solver__results">
+    @if (store.isRunning()) {
+      <app-loading-state
+        [algorithm]="store.algorithm()"
+        [progress]="store.progress()"
+      />
+    } @else if (store.hasNoSolution()) {
+      <app-no-solution-alert [n]="store.n()" />
+    } @else if (store.hasSolution() && store.board(); as board) {
+      <div class="nq-solver__results-layout">
+        <app-results-board
+          [board]="board"
+          [algorithm]="store.algorithm()!"
+          [solveTime]="store.solveTime()"
+          [generations]="store.generations() || null"
+          [iterations]="store.iterations() || null"
+        />
+        @if (hasChart()) {
+          <app-training-chart
+            [algorithm]="store.algorithm()!"
+            [evolutionHistory]="store.evolutionHistory()"
+            [trainingHistory]="store.trainingHistory()"
+            [brainHistory]="store.brainHistory()"
+          />
+        }
+      </div>
+    } @else {
+      <app-empty-state
+        title="Nenhuma execução ainda"
+        description="Escolha um algoritmo acima para começar. O tabuleiro aparecerá aqui."
+      />
+    }
+  </section>
+
+  @if (champions().length > 0) {
+    <app-champions-table
+      [champions]="champions()"
+      [view]="championsView()"
+      (viewSolution)="onViewChampion($event)"
+      (removeChampion)="onRemoveChampion($event)"
+      (clearAll)="onClearAll()"
+      (viewChange)="championsView.set($event)"
+    />
+  }
+</div>

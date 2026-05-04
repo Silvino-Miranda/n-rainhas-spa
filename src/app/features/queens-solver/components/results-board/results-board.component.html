@@ -1,0 +1,49 @@
+<section class="nq-board" aria-label="Tabuleiro com solução">
+  <div class="nq-board__grid"
+       [style.--nq-board-size]="cellSize() + 'px'"
+       [style.grid-template-columns]="'repeat(' + n() + ', var(--nq-board-size))'"
+       role="grid"
+       [attr.aria-rowcount]="n()"
+       [attr.aria-colcount]="n()">
+    @for (row of board(); track $index; let r = $index) {
+      <div class="nq-board__row" role="row">
+        @for (cell of row; track $index; let c = $index) {
+          <div
+            class="nq-board__cell"
+            role="gridcell"
+            [class.is-light]="isLight(r, c)"
+            [class.is-dark]="!isLight(r, c)"
+            [class.has-queen]="isQueen(r, c)"
+            [attr.aria-label]="isQueen(r, c) ? 'Rainha em linha ' + (r + 1) + ', coluna ' + (c + 1) : ('Linha ' + (r + 1) + ', coluna ' + (c + 1))"
+            [style.--nq-queen-delay]="isQueen(r, c) ? (queenIndex(r, c) * 60) + 'ms' : '0ms'"
+          >
+            @if (isQueen(r, c)) {
+              <span class="nq-board__queen" aria-hidden="true">♛</span>
+            }
+          </div>
+        }
+      </div>
+    }
+  </div>
+
+  <dl class="nq-board__stats" aria-live="polite">
+    <div>
+      <dt>Rainhas</dt>
+      <dd>{{ n() }}</dd>
+    </div>
+    <div>
+      <dt>Algoritmo</dt>
+      <dd>{{ algorithmLabel() }}</dd>
+    </div>
+    <div>
+      <dt>Tempo</dt>
+      <dd>{{ solveTime() | number: '1.0-2' }} ms</dd>
+    </div>
+    @if (metricLabel()) {
+      <div>
+        <dt>Métrica</dt>
+        <dd>{{ metricLabel() }}</dd>
+      </div>
+    }
+  </dl>
+</section>
