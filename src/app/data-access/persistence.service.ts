@@ -3,10 +3,16 @@ import { isPlatformBrowser } from '@angular/common';
 import { createStore, get, set, del, keys, clear, type UseStore } from 'idb-keyval';
 import type { AlgorithmType, ChampionV2, PreferencesV2 } from '../shared/models/algorithm.types';
 
-const DB_NAME = 'n-rainhas-db';
+// idb-keyval's createStore(dbName, storeName) initializes a database with a
+// SINGLE object store. Reusing the same dbName across calls with different
+// storeNames fails on subsequent invocations because the existing database
+// version does not declare the new store. Use one database per store.
+const DB_CHAMPIONS = 'n-rainhas-champions';
+const DB_PREFERENCES = 'n-rainhas-preferences';
+const DB_META = 'n-rainhas-metadata';
 const STORE_CHAMPIONS = 'champions';
 const STORE_PREFERENCES = 'preferences';
-const STORE_META = '__metadata__';
+const STORE_META = 'metadata';
 
 const LEGACY_KEY = 'nqueens_champions';
 const MIGRATION_FLAG = '__migrated_v1_to_v2__';
@@ -34,9 +40,9 @@ export class PersistenceService {
 
   async initialize(): Promise<void> {
     if (!this.isBrowser || this.initialized) return;
-    this.championsStore = createStore(DB_NAME, STORE_CHAMPIONS);
-    this.prefsStore = createStore(DB_NAME, STORE_PREFERENCES);
-    this.metaStore = createStore(DB_NAME, STORE_META);
+    this.championsStore = createStore(DB_CHAMPIONS, STORE_CHAMPIONS);
+    this.prefsStore = createStore(DB_PREFERENCES, STORE_PREFERENCES);
+    this.metaStore = createStore(DB_META, STORE_META);
     await this.migrateFromV1();
     this.initialized = true;
   }
