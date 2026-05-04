@@ -263,7 +263,10 @@ export class QueensSolverComponent {
       board,
       date: new Date().toLocaleString('pt-BR'),
       ...(generations !== undefined && { generations }),
-      ...(iterations !== undefined && { iterations })
+      ...(iterations !== undefined && { iterations }),
+      ...(algorithm === 'ga' && this.evolutionHistory().length > 0 && { evolutionHistory: this.evolutionHistory() }),
+      ...(algorithm === 'nn' && this.trainingHistory().length > 0 && { trainingHistory: this.trainingHistory() }),
+      ...(algorithm === 'brain' && this.brainHistory().length > 0 && { brainHistory: this.brainHistory() })
     };
 
     this.localStorage.saveChampion(champion);
@@ -291,9 +294,9 @@ export class QueensSolverComponent {
       this.iterations.set(result.iterations);
     }
 
-    this.evolutionHistory.set([]);
-    this.trainingHistory.set([]);
-    this.brainHistory.set([]);
+    this.evolutionHistory.set(result.evolutionHistory ?? []);
+    this.trainingHistory.set(result.trainingHistory ?? []);
+    this.brainHistory.set(result.brainHistory ?? []);
   }
 
   clearAllResults(): void {

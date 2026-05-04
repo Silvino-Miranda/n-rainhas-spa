@@ -16,6 +16,9 @@ export interface ChampionResult {
   solveTime: number;
   date: string;
   board: number[][];
+  evolutionHistory?: { generation: number; bestFitness: number; avgFitness: number }[];
+  trainingHistory?: { iteration: number; energy: number; validQueens: number }[];
+  brainHistory?: { iteration: number; error: number; validQueens: number }[];
 }
 
 /**
