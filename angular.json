@@ -42,7 +42,10 @@
             "styles": [
               "src/styles.scss"
             ],
-            "scripts": []
+            "scripts": [],
+            "allowedCommonJsDependencies": [
+              "brain.js"
+            ]
           },
           "configurations": {
             "production": {
