@@ -4,7 +4,7 @@
 
 .nq-content-grid {
   width: 100%;
-  max-width: 1200px;
+  max-width: 1280px;
   margin: 0 auto;
   padding: 0 var(--nq-space-6);
 }
@@ -12,50 +12,153 @@
 .nq-solver {
   display: flex;
   flex-direction: column;
-  gap: var(--nq-space-10);
+  gap: var(--nq-space-5);
 
-  &__hero {
+  &__stage {
+    display: grid;
+    gap: var(--nq-space-4);
+    grid-template-columns: 1fr;
+    min-height: 460px;
+  }
+
+  &__board {
     display: flex;
     flex-direction: column;
     gap: var(--nq-space-3);
-    max-width: 760px;
+    padding: var(--nq-space-4);
+    background: var(--nq-surface-card);
+    border: 1px solid var(--nq-surface-border);
+    border-radius: var(--nq-radius-lg);
+    box-shadow: var(--nq-shadow-1);
   }
 
-  &__eyebrow {
-    font-family: var(--nq-font-mono);
-    font-size: var(--nq-text-xs);
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    color: var(--nq-brand-primary);
+  &__board-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 var(--nq-space-1);
   }
 
-  &__title {
+  &__board-title {
     font-family: var(--nq-font-display);
-    font-size: clamp(var(--nq-text-3xl), 2.4vw + 1rem, var(--nq-text-5xl));
-    line-height: var(--nq-leading-tight);
+    font-size: var(--nq-text-lg);
     color: var(--nq-text-primary);
   }
 
-  &__lead {
+  &__zoom {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--nq-space-1);
+    padding: 4px var(--nq-space-2);
+    border-radius: var(--nq-radius-full);
+    background: transparent;
+    border: 1px solid var(--nq-surface-border);
     color: var(--nq-text-secondary);
-    font-size: var(--nq-text-lg);
-    max-width: 60ch;
+    font-family: var(--nq-font-mono);
+    font-size: var(--nq-text-xs);
+    transition: border-color var(--nq-duration-fast) var(--nq-ease-standard),
+                color var(--nq-duration-fast) var(--nq-ease-standard);
+
+    &:hover {
+      border-color: var(--nq-brand-primary);
+      color: var(--nq-brand-primary);
+    }
   }
 
-  &__results {
-    min-height: 240px;
+  &__board-body {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 320px;
   }
 
-  &__results-layout {
-    display: grid;
-    gap: var(--nq-space-6);
-    grid-template-columns: 1fr;
+  &__mini-wrap {
+    width: 100%;
+    max-width: 320px;
+
+    // Compact the inner ResultsBoard for mini variant
+    ::ng-deep .nq-board {
+      padding: var(--nq-space-3);
+      box-shadow: var(--nq-shadow-1);
+    }
+    ::ng-deep .nq-board__grid {
+      --nq-board-size: 26px !important;
+      grid-auto-rows: 26px !important;
+    }
+    ::ng-deep .nq-board__cell {
+      width: 26px !important;
+      height: 26px !important;
+    }
+    ::ng-deep .nq-board__queen {
+      font-size: 18px !important;
+    }
+    ::ng-deep .nq-board__stats {
+      padding: var(--nq-space-2);
+      grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+      gap: var(--nq-space-2);
+    }
+    ::ng-deep .nq-board__stats dt {
+      font-size: 10px;
+    }
+    ::ng-deep .nq-board__stats dd {
+      font-size: var(--nq-text-sm);
+    }
+  }
+
+  &__chart {
+    display: flex;
+    min-height: 320px;
+  }
+
+  &__chart-placeholder {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--nq-space-8);
+    border: 1px dashed var(--nq-surface-border);
+    border-radius: var(--nq-radius-lg);
+    color: var(--nq-text-secondary);
+    font-family: var(--nq-font-mono);
+    font-size: var(--nq-text-sm);
+    text-align: center;
+    background: color-mix(in oklab, var(--nq-surface-card) 50%, transparent);
   }
 }
 
-@media (min-width: 1100px) {
-  .nq-solver__results-layout {
-    grid-template-columns: minmax(0, auto) minmax(0, 1fr);
-    align-items: start;
+// Chart-first layout: mini-board ~340px on the left, chart fills the rest
+@media (min-width: 960px) {
+  .nq-solver__stage {
+    grid-template-columns: 360px minmax(0, 1fr);
+    align-items: stretch;
   }
+  .nq-solver__chart > * {
+    flex: 1;
+    width: 100%;
+  }
+}
+
+// On narrow screens, stack: chart on top (the star), then board, then table
+@media (max-width: 959px) {
+  .nq-solver__stage {
+    grid-template-rows: auto auto;
+  }
+  .nq-solver__chart {
+    order: 1;
+  }
+  .nq-solver__board {
+    order: 2;
+  }
+}
+
+// CDK overlay panel — center & let the dialog component define max sizes
+::ng-deep .cdk-overlay-pane.nq-dialog-panel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+::ng-deep .nq-dialog-backdrop {
+  background: var(--nq-surface-overlay);
+  backdrop-filter: blur(4px);
 }

@@ -1,16 +1,33 @@
 import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
-import { LucideAngularModule, Minus, Plus, Sparkles } from 'lucide-angular';
-import { AlgorithmCardComponent } from '../algorithm-card/algorithm-card.component';
+import {
+  LucideAngularModule,
+  Minus,
+  Plus,
+  Sparkles,
+  X,
+  GitMerge,
+  Dna,
+  Brain,
+  Network,
+  Sprout
+} from 'lucide-angular';
 import type { AlgorithmType } from '../../../../shared/models/algorithm.types';
 
 const ALGORITHMS: AlgorithmType[] = ['backtracking', 'ga', 'nn', 'brain'];
 const MIN_QUEENS = 1;
 const MAX_QUEENS = 15;
 
+const ALGO_LABELS: Record<AlgorithmType, string> = {
+  backtracking: 'Backtracking',
+  ga: 'Algoritmo Genético',
+  nn: 'Hopfield Híbrida',
+  brain: 'Brain.js'
+};
+
 @Component({
   selector: 'app-form-controls',
   standalone: true,
-  imports: [LucideAngularModule, AlgorithmCardComponent],
+  imports: [LucideAngularModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './form-controls.component.html',
   styleUrls: ['./form-controls.component.scss']
@@ -32,6 +49,9 @@ export class FormControlsComponent {
   protected readonly minusIcon = Minus;
   protected readonly plusIcon = Plus;
   protected readonly demoIcon = Sparkles;
+  protected readonly cancelIcon = X;
+  protected readonly seedIcon = Sprout;
+
   protected readonly algorithms = ALGORITHMS;
 
   protected readonly invalid = computed(() => {
@@ -41,14 +61,14 @@ export class FormControlsComponent {
 
   protected readonly errorMessage = computed(() => {
     const value = this.n();
-    if (Number.isNaN(value)) return 'Informe um número válido.';
-    if (value < MIN_QUEENS) return `N deve ser maior ou igual a ${MIN_QUEENS}.`;
-    if (value > MAX_QUEENS) return `N deve ser menor ou igual a ${MAX_QUEENS}.`;
+    if (Number.isNaN(value)) return 'Número inválido';
+    if (value < MIN_QUEENS) return `N >= ${MIN_QUEENS}`;
+    if (value > MAX_QUEENS) return `N <= ${MAX_QUEENS}`;
     return '';
   });
 
   protected updateN(raw: string | number): void {
-    const next = typeof raw === 'number' ? raw : Number.parseInt(raw, 10);
+    const next = typeof raw === 'number' ? raw : Number.parseInt(String(raw), 10);
     if (Number.isNaN(next)) return;
     this.nChange.emit(Math.min(MAX_QUEENS, Math.max(MIN_QUEENS, next)));
   }
@@ -58,8 +78,25 @@ export class FormControlsComponent {
   }
 
   protected dispatchRun(algorithm: AlgorithmType): void {
-    if (this.invalid()) return;
+    if (this.invalid() || this.isRunning()) return;
     this.run.emit({ algorithm, useSeed: algorithm === 'ga' && this.hasSeed() && this.evolveFromSeed() });
+  }
+
+  protected algorithmIcon(algorithm: AlgorithmType): unknown {
+    switch (algorithm) {
+      case 'backtracking': return GitMerge;
+      case 'ga':           return Dna;
+      case 'nn':           return Brain;
+      case 'brain':        return Network;
+    }
+  }
+
+  protected algorithmLabel(algorithm: AlgorithmType): string {
+    return ALGO_LABELS[algorithm];
+  }
+
+  protected algorithmColor(algorithm: AlgorithmType): string {
+    return `var(--nq-chart-${algorithm})`;
   }
 
   protected isAlgorithmRunning(algorithm: AlgorithmType): boolean {
@@ -67,6 +104,10 @@ export class FormControlsComponent {
   }
 
   protected isAlgorithmDisabled(algorithm: AlgorithmType): boolean {
-    return (this.isRunning() && this.runningAlgorithm() !== algorithm) || this.invalid();
+    return this.isRunning() || this.invalid();
+  }
+
+  protected toggleSeed(): void {
+    this.evolveFromSeedChange.emit(!this.evolveFromSeed());
   }
 }

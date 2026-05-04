@@ -1,70 +1,103 @@
-<section class="nq-form-controls" aria-label="Configuração do solver">
-  <div class="nq-form-controls__header">
-    <div class="nq-form-controls__field">
-      <label for="nq-n-input" class="nq-form-controls__label">Número de rainhas (N)</label>
-      <div class="nq-form-controls__stepper" role="group" aria-label="Selecionar N">
-        <button type="button" class="nq-form-controls__step" (click)="step(-1)" aria-label="Diminuir N" [disabled]="isRunning() || n() <= 1">
-          <lucide-icon [name]="minusIcon" [size]="18" aria-hidden="true"></lucide-icon>
-        </button>
-        <input
-          id="nq-n-input"
-          type="number"
-          class="nq-form-controls__input"
-          [value]="n()"
-          [min]="1"
-          [max]="15"
-          [attr.aria-invalid]="invalid()"
-          [attr.aria-describedby]="invalid() ? 'nq-n-error' : null"
-          (input)="updateN(($any($event.target)).value)"
-          [disabled]="isRunning()"
-          inputmode="numeric"
-        />
-        <button type="button" class="nq-form-controls__step" (click)="step(1)" aria-label="Aumentar N" [disabled]="isRunning() || n() >= 15">
-          <lucide-icon [name]="plusIcon" [size]="18" aria-hidden="true"></lucide-icon>
-        </button>
-      </div>
-      @if (invalid()) {
-        <p id="nq-n-error" class="nq-form-controls__error" role="alert">{{ errorMessage() }}</p>
-      } @else {
-        <p class="nq-form-controls__hint">Faixa válida: 1 a 15. Não há solução para N=2 ou N=3.</p>
-      }
+<section class="nq-toolbar" role="toolbar" aria-label="Controles do solver">
+  <div class="nq-toolbar__group">
+    <label for="nq-n-input" class="nq-toolbar__label">N</label>
+    <div class="nq-toolbar__stepper" role="group" aria-label="Selecionar N">
+      <button
+        type="button"
+        class="nq-toolbar__icon-btn"
+        (click)="step(-1)"
+        aria-label="Diminuir N"
+        [disabled]="isRunning() || n() <= 1"
+      >
+        <lucide-icon [name]="minusIcon" [size]="14" aria-hidden="true"></lucide-icon>
+      </button>
+      <input
+        id="nq-n-input"
+        type="number"
+        class="nq-toolbar__input"
+        [value]="n()"
+        [min]="1"
+        [max]="15"
+        [attr.aria-invalid]="invalid()"
+        (input)="updateN(($any($event.target)).value)"
+        [disabled]="isRunning()"
+        inputmode="numeric"
+      />
+      <button
+        type="button"
+        class="nq-toolbar__icon-btn"
+        (click)="step(1)"
+        aria-label="Aumentar N"
+        [disabled]="isRunning() || n() >= 15"
+      >
+        <lucide-icon [name]="plusIcon" [size]="14" aria-hidden="true"></lucide-icon>
+      </button>
     </div>
-
-    <button
-      type="button"
-      class="nq-form-controls__demo"
-      (click)="demo.emit()"
-      [disabled]="isRunning() || invalid()"
-    >
-      <lucide-icon [name]="demoIcon" [size]="16" aria-hidden="true"></lucide-icon>
-      Rodar demo (todos)
-    </button>
+    @if (invalid()) {
+      <span class="nq-toolbar__error" role="alert">{{ errorMessage() }}</span>
+    }
   </div>
 
-  @if (hasSeed()) {
-    <label class="nq-form-controls__seed">
-      <input
-        type="checkbox"
-        [checked]="evolveFromSeed()"
-        (change)="evolveFromSeedChange.emit(($any($event.target)).checked)"
-        [disabled]="isRunning()"
-      />
-      <span>Evoluir AG a partir do melhor campeão salvo para N={{ n() }}</span>
-    </label>
-  }
+  <div class="nq-toolbar__divider" aria-hidden="true"></div>
 
-  <div class="nq-algo-grid" role="list">
+  <div class="nq-toolbar__group nq-toolbar__algos" role="group" aria-label="Algoritmos">
     @for (algo of algorithms; track algo) {
-      <div role="listitem">
-        <app-algorithm-card
-          [algorithm]="algo"
-          [isRunning]="isAlgorithmRunning(algo)"
-          [disabled]="isAlgorithmDisabled(algo)"
-          [progress]="isAlgorithmRunning(algo) ? progress() : 0"
-          (run)="dispatchRun($event)"
-          (cancel)="cancel.emit($event)"
-        />
-      </div>
+      <button
+        type="button"
+        class="nq-toolbar__algo"
+        [class.is-running]="isAlgorithmRunning(algo)"
+        [style.--nq-algo-color]="algorithmColor(algo)"
+        [disabled]="isAlgorithmDisabled(algo)"
+        [attr.aria-label]="'Executar ' + algorithmLabel(algo)"
+        [title]="algorithmLabel(algo)"
+        (click)="dispatchRun(algo)"
+      >
+        <lucide-icon [name]="$any(algorithmIcon(algo))" [size]="16" aria-hidden="true"></lucide-icon>
+        <span class="nq-toolbar__algo-label">{{ algorithmLabel(algo) }}</span>
+        @if (isAlgorithmRunning(algo) && progress() > 0) {
+          <span class="nq-toolbar__algo-progress" [style.width.%]="progress()" aria-hidden="true"></span>
+        }
+      </button>
+    }
+  </div>
+
+  <div class="nq-toolbar__divider" aria-hidden="true"></div>
+
+  <div class="nq-toolbar__group">
+    @if (hasSeed()) {
+      <button
+        type="button"
+        class="nq-toolbar__icon-btn nq-toolbar__icon-btn--toggle"
+        [class.is-on]="evolveFromSeed()"
+        (click)="toggleSeed()"
+        [disabled]="isRunning()"
+        [attr.aria-pressed]="evolveFromSeed()"
+        [title]="evolveFromSeed() ? 'AG evolui a partir do campeão salvo' : 'AG inicia do zero'"
+        aria-label="Evoluir do campeão"
+      >
+        <lucide-icon [name]="seedIcon" [size]="14" aria-hidden="true"></lucide-icon>
+      </button>
+    }
+    <button
+      type="button"
+      class="nq-toolbar__icon-btn"
+      (click)="demo.emit()"
+      [disabled]="isRunning() || invalid()"
+      title="Rodar todos os 4 algoritmos sequencialmente"
+      aria-label="Rodar demo"
+    >
+      <lucide-icon [name]="demoIcon" [size]="14" aria-hidden="true"></lucide-icon>
+    </button>
+    @if (isRunning() && runningAlgorithm()) {
+      <button
+        type="button"
+        class="nq-toolbar__icon-btn nq-toolbar__icon-btn--danger"
+        (click)="cancel.emit(runningAlgorithm()!)"
+        title="Cancelar execução"
+        aria-label="Cancelar"
+      >
+        <lucide-icon [name]="cancelIcon" [size]="14" aria-hidden="true"></lucide-icon>
+      </button>
     }
   </div>
 </section>

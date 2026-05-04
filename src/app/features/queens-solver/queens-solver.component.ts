@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { from } from 'rxjs';
+import { Dialog } from '@angular/cdk/dialog';
 import { FormControlsComponent } from './components/form-controls/form-controls.component';
 import { ResultsBoardComponent } from './components/results-board/results-board.component';
 import { LoadingStateComponent } from './components/loading-state/loading-state.component';
@@ -8,10 +9,15 @@ import { NoSolutionAlertComponent } from './components/no-solution-alert/no-solu
 import { TrainingChartComponent } from './components/training-chart/training-chart.component';
 import { ChampionsTableComponent } from './components/champions-table/champions-table.component';
 import { EmptyStateComponent } from '../../shared/ui/empty-state/empty-state.component';
+import {
+  BoardZoomDialogComponent,
+  type BoardZoomData
+} from './components/board-zoom-dialog/board-zoom-dialog.component';
 import { QueensSolverStore } from './state/queens-solver.store';
 import { SolverOrchestratorService } from './services/solver-orchestrator.service';
 import { PersistenceService } from '../../data-access/persistence.service';
 import type { AlgorithmType, ChampionV2 } from '../../shared/models/algorithm.types';
+import { LucideAngularModule, Maximize2 } from 'lucide-angular';
 
 const DEMO_SEQUENCE: AlgorithmType[] = ['backtracking', 'ga', 'nn', 'brain'];
 
@@ -25,7 +31,8 @@ const DEMO_SEQUENCE: AlgorithmType[] = ['backtracking', 'ga', 'nn', 'brain'];
     NoSolutionAlertComponent,
     TrainingChartComponent,
     ChampionsTableComponent,
-    EmptyStateComponent
+    EmptyStateComponent,
+    LucideAngularModule
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './queens-solver.component.html',
@@ -35,10 +42,13 @@ export class QueensSolverComponent implements OnInit, OnDestroy {
   protected readonly store = inject(QueensSolverStore);
   private readonly orchestrator = inject(SolverOrchestratorService);
   private readonly persistence = inject(PersistenceService);
+  private readonly dialog = inject(Dialog);
 
   protected readonly evolveFromSeed = signal(true);
   protected readonly demoQueue = signal<AlgorithmType[]>([]);
   protected readonly championsView = signal<'cards' | 'table'>('cards');
+
+  protected readonly zoomIcon = Maximize2;
 
   protected readonly champions = toSignal(from(this.persistence.getChampions()), { initialValue: [] as ChampionV2[] });
 
@@ -48,13 +58,10 @@ export class QueensSolverComponent implements OnInit, OnDestroy {
 
   protected readonly hasChart = computed(() => {
     const algo = this.store.algorithm();
-    return (
-      algo === 'ga' && this.store.evolutionHistory().length > 0
-    ) || (
-      algo === 'nn' && this.store.trainingHistory().length > 0
-    ) || (
-      algo === 'brain' && this.store.brainHistory().length > 0
-    );
+    if (algo === 'ga') return this.store.evolutionHistory().length > 0;
+    if (algo === 'nn') return this.store.trainingHistory().length > 0;
+    if (algo === 'brain') return this.store.brainHistory().length > 0;
+    return false;
   });
 
   async ngOnInit(): Promise<void> {
@@ -127,5 +134,28 @@ export class QueensSolverComponent implements OnInit, OnDestroy {
     if (!confirm('Apagar todos os campeões? Esta ação não pode ser desfeita.')) return;
     await this.persistence.clearAllChampions();
     location.reload();
+  }
+
+  protected openZoom(): void {
+    const board = this.store.board();
+    const algorithm = this.store.algorithm();
+    if (!board || !algorithm) return;
+
+    const data: BoardZoomData = {
+      board,
+      algorithm,
+      solveTime: this.store.solveTime(),
+      generations: this.store.generations() || null,
+      iterations: this.store.iterations() || null
+    };
+
+    this.dialog.open<void, BoardZoomData>(BoardZoomDialogComponent, {
+      data,
+      hasBackdrop: true,
+      backdropClass: 'nq-dialog-backdrop',
+      panelClass: 'nq-dialog-panel',
+      autoFocus: 'first-tabbable',
+      restoreFocus: true
+    });
   }
 }
