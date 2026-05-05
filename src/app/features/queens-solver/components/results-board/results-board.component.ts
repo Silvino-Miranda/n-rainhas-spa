@@ -22,6 +22,11 @@ export class ResultsBoardComponent {
    * of N. When null, cellSize falls back to a per-N step scale.
    */
   readonly targetSize = input<number | null>(null);
+  /**
+   * Where the stats legend sits relative to the grid: below (default)
+   * stacks them; beside places them to the right of the board.
+   */
+  readonly statsPosition = input<'below' | 'beside'>('below');
 
   protected readonly n = computed(() => this.board().length);
   protected readonly cellSize = computed(() => {

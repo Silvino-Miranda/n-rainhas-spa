@@ -13,6 +13,25 @@
   border-radius: var(--nq-radius-lg);
   box-shadow: var(--nq-shadow-3);
 
+  &.is-beside {
+    flex-direction: row;
+    align-items: center;
+    gap: var(--nq-space-6);
+  }
+  &.is-beside .nq-board__stats {
+    grid-template-columns: 1fr;
+    align-content: center;
+    min-width: 180px;
+  }
+  @media (max-width: 720px) {
+    &.is-beside {
+      flex-direction: column;
+    }
+    &.is-beside .nq-board__stats {
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    }
+  }
+
   &__grid {
     display: grid;
     grid-auto-rows: var(--nq-board-size, 48px);

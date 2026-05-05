@@ -1,4 +1,4 @@
-<section class="nq-board" aria-label="Tabuleiro com solução">
+<section class="nq-board" [class.is-beside]="statsPosition() === 'beside'" aria-label="Tabuleiro com solução">
   <div class="nq-board__grid"
        [style.--nq-board-size]="cellSize() + 'px'"
        [style.grid-template-columns]="'repeat(' + n() + ', var(--nq-board-size))'"
