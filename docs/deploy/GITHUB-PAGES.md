@@ -90,6 +90,20 @@ Verifica `--base-href`. Está parametrizado a partir de `github.event.repository
 
 Lighthouse roda com `continue-on-error: true`. Não bloqueia deploy. Acessa o relatório no link público que a action posta.
 
+### `Branch "develop" is not allowed to deploy to github-pages due to environment protection rules.`
+
+GitHub criou automaticamente o environment `github-pages` quando você ativou Pages, mas restringiu a `main`. Adicionar `develop`:
+
+1. Abrir: `https://github.com/Silvino-Miranda/n-rainhas-spa/settings/environments`
+2. Clicar em **github-pages**
+3. Em **Deployment branches and tags**:
+   - Manter **Selected branches and tags**
+   - **Add deployment branch or tag rule** → digitar `develop` → **Add rule**
+   - Repetir para `main` se não estiver listado
+4. (Alternativa preguiçosa) Mudar para **No restriction** — qualquer branch passa a deployar. Use com cautela.
+
+Após salvar, o próximo push em `develop` passa pelo gate.
+
 ---
 
 ## Alternativa: PAT (não recomendado, mas existe)
