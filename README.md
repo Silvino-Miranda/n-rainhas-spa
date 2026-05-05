@@ -10,41 +10,39 @@ Bancada de comparação interativa entre 4 algoritmos para o problema das N-Rain
 
 ## 📸 Screenshots
 
-> Coloque os PNGs em `docs/screenshots/` com os nomes abaixo. As imagens já são referenciadas aqui.
-
-### Solver — visão principal (chart-first)
+### Solver — chart-first (chart à esquerda, mini-tabuleiro à direita)
 
 ![Solver — chart à esquerda, mini-tabuleiro à direita](docs/screenshots/01-solver.png)
 
-### Modal de tabuleiro ampliado (Zoom)
+### Tabuleiro ampliado — modal com legenda à direita
 
 ![Modal Zoom com legenda à direita](docs/screenshots/02-zoom-board.png)
 
-### Gráfico ampliado (full-screen abaixo da topbar)
+### Gráfico ampliado — tela cheia abaixo da topbar
 
 ![Modal Ampliar — gráfico em tela cheia](docs/screenshots/03-zoom-chart.png)
 
-### Toolbar e seleção de algoritmo
+### Toolbar compacta — stepper N + pills coloridas dos 4 algoritmos
 
 ![Toolbar com stepper N e pills coloridas dos algoritmos](docs/screenshots/04-toolbar.png)
 
-### Página de Campeões
+### Campeões — tabela com filtros (algoritmo, N) + ordenação
 
 ![Tabela de campeões com filtros e ordenação](docs/screenshots/05-champions.png)
 
-### Modal de confirmação (limpar campeões)
+### ConfirmDialog — confirmação destrutiva (tom danger)
 
 ![ConfirmDialog com tom danger](docs/screenshots/06-confirm.png)
 
-### Estado sem solução (N=2 ou N=3)
+### NoSolutionAlert — N=2 ou N=3
 
 ![Card NoSolutionAlert com left-border âmbar](docs/screenshots/07-no-solution.png)
 
-### Tema claro
+### Tema claro — alternado pelo ThemeToggle (persiste em localStorage)
 
 ![Solver no tema claro alternado pelo ThemeToggle](docs/screenshots/08-theme-light.png)
 
-### Página Sobre
+### Página Sobre — /about
 
 ![Página /about explicando estratégias e stack](docs/screenshots/09-about.png)
 
