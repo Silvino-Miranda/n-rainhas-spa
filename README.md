@@ -4,6 +4,8 @@ Aplicação Angular que resolve o problema das N-Rainhas utilizando quatro algor
 
 ![N-Rainhas SPA Home](src/assets/home.png)
 
+> ⚠️ **Primeira vez clonando?** Antes de o deploy automático funcionar, é preciso ativar GitHub Pages **uma única vez**: `Settings → Pages → Source: GitHub Actions`. Runbook completo em [`docs/deploy/GITHUB-PAGES.md`](docs/deploy/GITHUB-PAGES.md).
+
 ## ⚡ Tecnologias Modernas (Angular 21)
 
 Esta aplicação foi refatorada para utilizar os recursos mais recentes do Angular:

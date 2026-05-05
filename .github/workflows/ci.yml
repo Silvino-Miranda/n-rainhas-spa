@@ -143,12 +143,12 @@ jobs:
         run: touch dist/n-rainhas/browser/.nojekyll
 
       - name: Setup Pages
+        # Note: enablement:true requires Administration:write, which the
+        # default GITHUB_TOKEN does not receive. Pages must be enabled
+        # ONCE, manually, by a repository admin:
+        #   Settings -> Pages -> Build and deployment -> Source: GitHub Actions
+        # See docs/deploy/GITHUB-PAGES.md for the full runbook.
         uses: actions/configure-pages@v5
-        with:
-          # Enables Pages on the repo on first run if Settings -> Pages
-          # has not been configured manually. Requires pages: write
-          # permission, which the job already declares.
-          enablement: true
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
