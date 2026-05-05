@@ -79,7 +79,9 @@ jobs:
     name: Lighthouse CI
     runs-on: ubuntu-latest
     needs: build
-    if: github.event_name == 'pull_request'
+    # Run on every PR plus pushes to main/develop so we track scores
+    # between releases instead of only on merge requests.
+    if: github.event_name == 'pull_request' || (github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'))
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -103,7 +105,9 @@ jobs:
     name: Deploy to GitHub Pages
     runs-on: ubuntu-latest
     needs: build
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    # Deploy on push to main (production) or develop (staging-on-Pages
+    # while there is no separate staging environment).
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
     permissions:
       contents: read
       pages: write
