@@ -1,6 +1,6 @@
 {
   "name": "n-rainhas",
-  "version": "2.0.0-dev",
+  "version": "1.0.0",
   "private": true,
   "packageManager": "pnpm@9.15.0",
   "scripts": {
