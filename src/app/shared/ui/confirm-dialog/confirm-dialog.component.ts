@@ -43,7 +43,6 @@ export interface ConfirmDialogData {
           type="button"
           class="nq-confirm__btn nq-confirm__btn--primary"
           (click)="dialogRef.close(true)"
-          autofocus
         >
           {{ data.confirmLabel ?? 'Confirmar' }}
         </button>

@@ -1,14 +1,20 @@
 {
   "name": "n-rainhas",
   "version": "2.0.0-dev",
+  "private": true,
+  "packageManager": "pnpm@9.15.0",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "vitest run --passWithNoTests",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage --passWithNoTests",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "typecheck": "tsc --noEmit -p tsconfig.app.json"
   },
-  "private": true,
   "dependencies": {
     "@angular/animations": "^21.0.3",
     "@angular/cdk": "~21.0.6",
@@ -26,19 +32,22 @@
     "tslib": "^2.3.0"
   },
   "devDependencies": {
+    "@analogjs/vite-plugin-angular": "^2.5.0",
+    "@analogjs/vitest-angular": "^2.5.0",
     "@angular/build": "^21.0.2",
     "@angular/cli": "^21.0.2",
     "@angular/compiler-cli": "^21.0.3",
     "@angular/language-service": "^21.0.3",
-    "@types/jasmine": "~5.1.0",
+    "@angular/platform-browser-dynamic": "^21.0.3",
     "@types/node": "^22.0.0",
-    "jasmine-core": "~5.1.0",
-    "karma": "^6.4.0",
-    "karma-chrome-launcher": "~3.2.0",
-    "karma-coverage": "^2.2.0",
-    "karma-jasmine": "~5.1.0",
-    "karma-jasmine-html-reporter": "^2.1.0",
+    "@vitest/coverage-v8": "^3.1.0",
+    "angular-eslint": "^21.3.1",
+    "eslint": "^9.0.0",
+    "jsdom": "^25.0.0",
     "prettier": "^3.3.0",
-    "typescript": "~5.9.3"
+    "typescript": "~5.9.3",
+    "typescript-eslint": "^8.59.0",
+    "vitest": "^3.1.0",
+    "zone.js": "~0.15.1"
   }
 }

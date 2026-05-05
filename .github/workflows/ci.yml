@@ -11,25 +11,35 @@ permissions:
 
 jobs:
   build:
-    name: Build & Test
+    name: Lint, Test, Build
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
 
+      - uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: npm
+          cache: pnpm
 
       - name: Install dependencies
-        run: npm ci
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm lint
 
       - name: Type-check
-        run: npx tsc --noEmit -p tsconfig.app.json
+        run: pnpm typecheck
+
+      - name: Unit tests (Vitest)
+        run: pnpm test --reporter=default
 
       - name: Build (production)
-        run: npx ng build --configuration production
+        run: pnpm build --configuration production
 
       - name: Bundle-size gate
         shell: bash
@@ -41,7 +51,6 @@ jobs:
           fi
           SIZE=$(wc -c < "$MAIN")
           echo "Initial JS size (uncompressed): $SIZE bytes"
-          # Soft gate at 1.0 MB uncompressed; gz roughly ~30% of that
           if [ "$SIZE" -gt 1048576 ]; then
             echo "::warning::Initial bundle exceeds 1 MB uncompressed."
           fi
@@ -60,10 +69,15 @@ jobs:
     if: github.event_name == 'pull_request'
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          run_install: false
       - uses: actions/setup-node@v4
-        with: { node-version: 22, cache: npm }
-      - run: npm ci
-      - run: npx ng build --configuration production
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build --configuration production
       - name: Lighthouse CI
         uses: treosh/lighthouse-ci-action@v12
         with:

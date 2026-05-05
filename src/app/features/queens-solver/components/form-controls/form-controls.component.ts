@@ -103,7 +103,7 @@ export class FormControlsComponent {
     return this.isRunning() && this.runningAlgorithm() === algorithm;
   }
 
-  protected isAlgorithmDisabled(algorithm: AlgorithmType): boolean {
+  protected isAlgorithmDisabled(_algorithm: AlgorithmType): boolean {
     return this.isRunning() || this.invalid();
   }
 
