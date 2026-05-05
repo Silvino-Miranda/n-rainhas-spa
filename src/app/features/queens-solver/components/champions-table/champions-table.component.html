@@ -55,6 +55,14 @@
         }
       </select>
     </label>
+    <label>
+      <span>Ordenar</span>
+      <select (change)="sortBy.set($any($event.target).value)">
+        @for (opt of sortOptions; track opt.key) {
+          <option [value]="opt.key" [selected]="sortBy() === opt.key">{{ opt.label }}</option>
+        }
+      </select>
+    </label>
   </div>
 
   @if (filtered().length === 0) {

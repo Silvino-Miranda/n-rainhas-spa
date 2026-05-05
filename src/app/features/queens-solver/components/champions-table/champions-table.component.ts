@@ -4,6 +4,14 @@ import { LucideAngularModule, Trophy, Eye, Trash2, LayoutGrid, Table as TableIco
 import { ALGORITHM_LABELS, type AlgorithmType, type ChampionV2 } from '../../../../shared/models/algorithm.types';
 
 type View = 'cards' | 'table';
+type SortKey =
+  | 'time-asc'
+  | 'time-desc'
+  | 'n-asc'
+  | 'n-desc'
+  | 'algorithm'
+  | 'date-desc'
+  | 'date-asc';
 
 @Component({
   selector: 'app-champions-table',
@@ -30,14 +38,51 @@ export class ChampionsTableComponent {
 
   protected readonly filterAlgorithm = signal<AlgorithmType | 'all'>('all');
   protected readonly filterN = signal<number | null>(null);
+  protected readonly sortBy = signal<SortKey>('time-asc');
 
   protected readonly algorithms: ('all' | AlgorithmType)[] = ['all', 'backtracking', 'ga', 'nn', 'brain'];
+  protected readonly sortOptions: { key: SortKey; label: string }[] = [
+    { key: 'time-asc', label: 'Tempo (mais rápido)' },
+    { key: 'time-desc', label: 'Tempo (mais lento)' },
+    { key: 'n-asc', label: 'N crescente' },
+    { key: 'n-desc', label: 'N decrescente' },
+    { key: 'algorithm', label: 'Algoritmo (A→Z)' },
+    { key: 'date-desc', label: 'Mais recente' },
+    { key: 'date-asc', label: 'Mais antigo' }
+  ];
 
   protected readonly filtered = computed(() => {
     const list = this.champions();
     const fa = this.filterAlgorithm();
     const fn = this.filterN();
-    return list.filter(c => (fa === 'all' || c.algorithm === fa) && (fn === null || c.n === fn));
+    const filtered = list.filter(
+      c => (fa === 'all' || c.algorithm === fa) && (fn === null || c.n === fn)
+    );
+    const sorted = [...filtered];
+    switch (this.sortBy()) {
+      case 'time-asc':
+        sorted.sort((a, b) => a.solveTime - b.solveTime);
+        break;
+      case 'time-desc':
+        sorted.sort((a, b) => b.solveTime - a.solveTime);
+        break;
+      case 'n-asc':
+        sorted.sort((a, b) => a.n - b.n || a.solveTime - b.solveTime);
+        break;
+      case 'n-desc':
+        sorted.sort((a, b) => b.n - a.n || a.solveTime - b.solveTime);
+        break;
+      case 'algorithm':
+        sorted.sort((a, b) => a.algorithm.localeCompare(b.algorithm) || a.n - b.n);
+        break;
+      case 'date-desc':
+        sorted.sort((a, b) => b.createdAt - a.createdAt);
+        break;
+      case 'date-asc':
+        sorted.sort((a, b) => a.createdAt - b.createdAt);
+        break;
+    }
+    return sorted;
   });
 
   protected algorithmLabel(algorithm: AlgorithmType | 'all'): string {
