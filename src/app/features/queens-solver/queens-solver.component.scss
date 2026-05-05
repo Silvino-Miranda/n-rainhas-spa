@@ -158,35 +158,8 @@
   }
 
   &__chart {
-    position: relative;
     display: flex;
     min-height: 320px;
-  }
-
-  &__chart-expand {
-    position: absolute;
-    top: var(--nq-space-3);
-    right: var(--nq-space-3);
-    z-index: var(--nq-z-raised);
-    display: inline-flex;
-    align-items: center;
-    gap: var(--nq-space-1);
-    padding: 4px var(--nq-space-2);
-    border-radius: var(--nq-radius-full);
-    background: var(--nq-surface-card);
-    border: 1px solid var(--nq-surface-border);
-    color: var(--nq-text-secondary);
-    font-family: var(--nq-font-mono);
-    font-size: var(--nq-text-xs);
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    transition: border-color var(--nq-duration-fast) var(--nq-ease-standard),
-                color var(--nq-duration-fast) var(--nq-ease-standard);
-
-    &:hover {
-      border-color: var(--nq-brand-primary);
-      color: var(--nq-brand-primary);
-    }
   }
 
   &__chart-placeholder {

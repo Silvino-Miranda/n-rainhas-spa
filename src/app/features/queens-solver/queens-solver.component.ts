@@ -52,7 +52,6 @@ export class QueensSolverComponent implements OnInit, OnDestroy {
   protected readonly demoQueue = signal<AlgorithmType[]>([]);
 
   protected readonly zoomIcon = Maximize2;
-  protected readonly expandChartIcon = Maximize2;
   protected readonly seedIcon = Sprout;
   protected readonly demoIcon = Sparkles;
 

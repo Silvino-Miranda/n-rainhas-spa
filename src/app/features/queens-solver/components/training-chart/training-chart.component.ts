@@ -7,10 +7,12 @@ import {
   inject,
   input,
   OnDestroy,
+  output,
   PLATFORM_ID,
   viewChild
 } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
+import { LucideAngularModule, Maximize2 } from 'lucide-angular';
 import type {
   AlgorithmType,
   BrainPoint,
@@ -28,12 +30,26 @@ const ALGO_COLOR: Record<AlgorithmType, string> = {
 @Component({
   selector: 'app-training-chart',
   standalone: true,
+  imports: [LucideAngularModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <section class="nq-chart" aria-label="Gráfico de evolução do algoritmo">
       <header class="nq-chart__header">
         <h3>Evolução do treinamento</h3>
-        <span class="nq-chart__count">{{ totalPoints() }} pontos</span>
+        <div class="nq-chart__header-right">
+          <span class="nq-chart__count">{{ totalPoints() }} pontos</span>
+          @if (expandable()) {
+            <button
+              type="button"
+              class="nq-chart__expand"
+              (click)="expand.emit()"
+              title="Ampliar gráfico"
+              aria-label="Ampliar gráfico em tela cheia"
+            >
+              <lucide-icon [name]="expandIcon" [size]="14" aria-hidden="true"></lucide-icon>
+            </button>
+          }
+        </div>
       </header>
       <div class="nq-chart__canvas-wrapper">
         <canvas #canvas></canvas>
@@ -64,6 +80,26 @@ const ALGO_COLOR: Record<AlgorithmType, string> = {
       font-size: var(--nq-text-xs);
       color: var(--nq-text-secondary);
     }
+    .nq-chart__header-right {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--nq-space-2);
+    }
+    .nq-chart__expand {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      border-radius: var(--nq-radius-full);
+      color: var(--nq-text-secondary);
+      transition: background var(--nq-duration-fast) var(--nq-ease-standard),
+                  color var(--nq-duration-fast) var(--nq-ease-standard);
+    }
+    .nq-chart__expand:hover {
+      background: var(--nq-surface-subtle);
+      color: var(--nq-brand-primary);
+    }
     .nq-chart__canvas-wrapper {
       position: relative;
       height: 280px;
@@ -76,6 +112,11 @@ export class TrainingChartComponent implements AfterViewInit, OnDestroy {
   readonly evolutionHistory = input<EvolutionPoint[]>([]);
   readonly trainingHistory = input<TrainingPoint[]>([]);
   readonly brainHistory = input<BrainPoint[]>([]);
+  readonly expandable = input(false);
+
+  readonly expand = output<void>();
+
+  protected readonly expandIcon = Maximize2;
 
   private readonly canvasRef = viewChild<ElementRef<HTMLCanvasElement>>('canvas');
   private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
