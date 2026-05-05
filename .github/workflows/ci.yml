@@ -144,6 +144,11 @@ jobs:
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
+        with:
+          # Enables Pages on the repo on first run if Settings -> Pages
+          # has not been configured manually. Requires pages: write
+          # permission, which the job already declares.
+          enablement: true
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
