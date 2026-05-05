@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, effect, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { Dialog } from '@angular/cdk/dialog';
 import { RouterLink } from '@angular/router';
-import { LucideAngularModule, Maximize2 } from 'lucide-angular';
+import { LucideAngularModule, Maximize2, Sparkles, Sprout } from 'lucide-angular';
 import { FormControlsComponent } from './components/form-controls/form-controls.component';
 import { ResultsBoardComponent } from './components/results-board/results-board.component';
 import { LoadingStateComponent } from './components/loading-state/loading-state.component';
@@ -46,6 +46,8 @@ export class QueensSolverComponent implements OnInit, OnDestroy {
   protected readonly demoQueue = signal<AlgorithmType[]>([]);
 
   protected readonly zoomIcon = Maximize2;
+  protected readonly seedIcon = Sprout;
+  protected readonly demoIcon = Sparkles;
 
   protected readonly champions = signal<ChampionV2[]>([]);
 

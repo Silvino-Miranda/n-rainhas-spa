@@ -14,6 +14,65 @@
   flex-direction: column;
   gap: var(--nq-space-5);
 
+  &__bar {
+    display: flex;
+    align-items: center;
+    gap: var(--nq-space-3);
+    flex-wrap: wrap;
+  }
+
+  &__bar-toolbar {
+    flex: 1 1 320px;
+    min-width: 0;
+  }
+
+  &__extras {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--nq-space-1);
+    flex: 0 0 auto;
+  }
+
+  &__extra-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--nq-space-1);
+    padding: 6px var(--nq-space-3);
+    border-radius: var(--nq-radius-full);
+    background: transparent;
+    border: 1px solid var(--nq-surface-border);
+    color: var(--nq-text-secondary);
+    font-family: var(--nq-font-mono);
+    font-size: var(--nq-text-xs);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    transition: border-color var(--nq-duration-fast) var(--nq-ease-standard),
+                color var(--nq-duration-fast) var(--nq-ease-standard),
+                background var(--nq-duration-fast) var(--nq-ease-standard);
+
+    &:hover:not(:disabled) {
+      border-color: var(--nq-brand-primary);
+      color: var(--nq-brand-primary);
+    }
+
+    &:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    &.is-on {
+      border-color: var(--nq-success);
+      color: var(--nq-success);
+      background: color-mix(in oklab, var(--nq-success) 14%, transparent);
+    }
+
+    span {
+      @media (max-width: 720px) {
+        display: none;
+      }
+    }
+  }
+
   &__stage {
     display: grid;
     gap: var(--nq-space-4);
@@ -146,19 +205,25 @@
   }
 }
 
-// Chart-first layout: mini-board ~340px on the left, chart fills the rest
+// Chart-first layout: chart fills the left, mini-board ~360px on the right
 @media (min-width: 960px) {
   .nq-solver__stage {
-    grid-template-columns: 360px minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr) 360px;
     align-items: stretch;
   }
-  .nq-solver__chart > * {
-    flex: 1;
-    width: 100%;
+  .nq-solver__chart {
+    order: 1;
+    > * {
+      flex: 1;
+      width: 100%;
+    }
+  }
+  .nq-solver__board {
+    order: 2;
   }
 }
 
-// On narrow screens, stack: chart on top (the star), then board, then table
+// On narrow screens, stack: chart on top (the star), then board
 @media (max-width: 959px) {
   .nq-solver__stage {
     grid-template-rows: auto auto;

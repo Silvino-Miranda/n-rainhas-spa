@@ -61,34 +61,9 @@
     }
   </div>
 
-  <div class="nq-toolbar__divider" aria-hidden="true"></div>
-
-  <div class="nq-toolbar__group">
-    @if (hasSeed()) {
-      <button
-        type="button"
-        class="nq-toolbar__icon-btn nq-toolbar__icon-btn--toggle"
-        [class.is-on]="evolveFromSeed()"
-        (click)="toggleSeed()"
-        [disabled]="isRunning()"
-        [attr.aria-pressed]="evolveFromSeed()"
-        [title]="evolveFromSeed() ? 'AG evolui a partir do campeão salvo' : 'AG inicia do zero'"
-        aria-label="Evoluir do campeão"
-      >
-        <lucide-icon [name]="seedIcon" [size]="14" aria-hidden="true"></lucide-icon>
-      </button>
-    }
-    <button
-      type="button"
-      class="nq-toolbar__icon-btn"
-      (click)="demo.emit()"
-      [disabled]="isRunning() || invalid()"
-      title="Rodar todos os 4 algoritmos sequencialmente"
-      aria-label="Rodar demo"
-    >
-      <lucide-icon [name]="demoIcon" [size]="14" aria-hidden="true"></lucide-icon>
-    </button>
-    @if (isRunning() && runningAlgorithm()) {
+  @if (isRunning() && runningAlgorithm()) {
+    <div class="nq-toolbar__divider" aria-hidden="true"></div>
+    <div class="nq-toolbar__group">
       <button
         type="button"
         class="nq-toolbar__icon-btn nq-toolbar__icon-btn--danger"
@@ -98,6 +73,6 @@
       >
         <lucide-icon [name]="cancelIcon" [size]="14" aria-hidden="true"></lucide-icon>
       </button>
-    }
-  </div>
+    </div>
+  }
 </section>

@@ -1,17 +1,49 @@
 <div class="nq-solver nq-content-grid">
-  <app-form-controls
-    [n]="store.n()"
-    [isRunning]="store.isRunning()"
-    [runningAlgorithm]="store.algorithm()"
-    [progress]="store.progress()"
-    [hasSeed]="seedExists()"
-    [evolveFromSeed]="evolveFromSeed()"
-    (nChange)="onNChange($event)"
-    (run)="onRun($event)"
-    (cancel)="onCancel()"
-    (evolveFromSeedChange)="evolveFromSeed.set($event)"
-    (demo)="onDemo()"
-  />
+  <div class="nq-solver__bar">
+    <app-form-controls
+      class="nq-solver__bar-toolbar"
+      [n]="store.n()"
+      [isRunning]="store.isRunning()"
+      [runningAlgorithm]="store.algorithm()"
+      [progress]="store.progress()"
+      [hasSeed]="seedExists()"
+      [evolveFromSeed]="evolveFromSeed()"
+      (nChange)="onNChange($event)"
+      (run)="onRun($event)"
+      (cancel)="onCancel()"
+      (evolveFromSeedChange)="evolveFromSeed.set($event)"
+      (demo)="onDemo()"
+    />
+
+    <div class="nq-solver__extras" role="group" aria-label="Ações extras">
+      @if (seedExists()) {
+        <button
+          type="button"
+          class="nq-solver__extra-btn"
+          [class.is-on]="evolveFromSeed()"
+          (click)="evolveFromSeed.set(!evolveFromSeed())"
+          [disabled]="store.isRunning()"
+          [attr.aria-pressed]="evolveFromSeed()"
+          [title]="evolveFromSeed() ? 'AG evolui a partir do campeão salvo' : 'AG inicia do zero'"
+          aria-label="Evoluir do campeão"
+        >
+          <lucide-icon [name]="seedIcon" [size]="14" aria-hidden="true"></lucide-icon>
+          <span>Seed</span>
+        </button>
+      }
+      <button
+        type="button"
+        class="nq-solver__extra-btn"
+        (click)="onDemo()"
+        [disabled]="store.isRunning()"
+        title="Rodar todos os 4 algoritmos sequencialmente"
+        aria-label="Rodar demo"
+      >
+        <lucide-icon [name]="demoIcon" [size]="14" aria-hidden="true"></lucide-icon>
+        <span>Demo</span>
+      </button>
+    </div>
+  </div>
 
   <section class="nq-solver__stage" aria-label="Resultado e evolução">
     <aside class="nq-solver__board" aria-label="Mini tabuleiro">
