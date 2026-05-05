@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: n-rainhas
+  labels:
+    app.kubernetes.io/name: n-rainhas-spa
+    app.kubernetes.io/part-of: n-rainhas
