@@ -1,7 +1,9 @@
 import { ChangeDetectionStrategy, Component, effect, inject, OnInit, signal } from '@angular/core';
 import { Router } from '@angular/router';
+import { Dialog } from '@angular/cdk/dialog';
 import { ChampionsTableComponent } from '../queens-solver/components/champions-table/champions-table.component';
 import { EmptyStateComponent } from '../../shared/ui/empty-state/empty-state.component';
+import { openConfirmDialog } from '../../shared/ui/confirm-dialog/confirm-dialog.component';
 import { PersistenceService } from '../../data-access/persistence.service';
 import { QueensSolverStore } from '../queens-solver/state/queens-solver.store';
 import type { ChampionsView, ChampionV2 } from '../../shared/models/algorithm.types';
@@ -72,6 +74,7 @@ export class ChampionsComponent implements OnInit {
   private readonly persistence = inject(PersistenceService);
   private readonly router = inject(Router);
   private readonly store = inject(QueensSolverStore);
+  private readonly dialog = inject(Dialog);
 
   protected readonly view = signal<ChampionsView>('cards');
   protected readonly champions = signal<ChampionV2[]>([]);
@@ -113,7 +116,14 @@ export class ChampionsComponent implements OnInit {
   }
 
   protected async onClearAll(): Promise<void> {
-    if (!confirm('Apagar todos os campeões? Esta ação não pode ser desfeita.')) return;
+    const confirmed = await openConfirmDialog(this.dialog, {
+      title: 'Apagar todos os campeões?',
+      message: 'Esta ação remove permanentemente todos os campeões salvos para todos os algoritmos e tamanhos de N. Não pode ser desfeita.',
+      confirmLabel: 'Apagar tudo',
+      cancelLabel: 'Cancelar',
+      tone: 'danger'
+    });
+    if (!confirmed) return;
     await this.persistence.clearAllChampions();
   }
 }
