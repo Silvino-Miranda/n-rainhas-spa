@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, effect, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { Dialog } from '@angular/cdk/dialog';
+import { Overlay } from '@angular/cdk/overlay';
 import { RouterLink } from '@angular/router';
 import { LucideAngularModule, Maximize2, Sparkles, Sprout } from 'lucide-angular';
 import { FormControlsComponent } from './components/form-controls/form-controls.component';
@@ -12,6 +13,10 @@ import {
   BoardZoomDialogComponent,
   type BoardZoomData
 } from './components/board-zoom-dialog/board-zoom-dialog.component';
+import {
+  ChartExpandDialogComponent,
+  type ChartExpandData
+} from './components/chart-expand-dialog/chart-expand-dialog.component';
 import { QueensSolverStore } from './state/queens-solver.store';
 import { SolverOrchestratorService } from './services/solver-orchestrator.service';
 import { PersistenceService } from '../../data-access/persistence.service';
@@ -41,11 +46,13 @@ export class QueensSolverComponent implements OnInit, OnDestroy {
   private readonly orchestrator = inject(SolverOrchestratorService);
   private readonly persistence = inject(PersistenceService);
   private readonly dialog = inject(Dialog);
+  private readonly overlay = inject(Overlay);
 
   protected readonly evolveFromSeed = signal(true);
   protected readonly demoQueue = signal<AlgorithmType[]>([]);
 
   protected readonly zoomIcon = Maximize2;
+  protected readonly expandChartIcon = Maximize2;
   protected readonly seedIcon = Sprout;
   protected readonly demoIcon = Sparkles;
 
@@ -115,6 +122,36 @@ export class QueensSolverComponent implements OnInit, OnDestroy {
     this.demoQueue.set(queue);
     if (!next) return;
     this.orchestrator.solve(next, this.store.n());
+  }
+
+  protected openChartExpand(): void {
+    if (!this.hasChart() || !this.store.algorithm()) return;
+
+    const data: ChartExpandData = {
+      algorithm: this.store.algorithm()!,
+      evolutionHistory: this.store.evolutionHistory(),
+      trainingHistory: this.store.trainingHistory(),
+      brainHistory: this.store.brainHistory()
+    };
+
+    const TOPBAR = 64;
+    this.dialog.open<void, ChartExpandData>(ChartExpandDialogComponent, {
+      data,
+      hasBackdrop: true,
+      backdropClass: 'nq-chart-expand-backdrop',
+      panelClass: 'nq-chart-expand-panel',
+      autoFocus: 'first-tabbable',
+      restoreFocus: true,
+      width: '100vw',
+      height: `calc(100vh - ${TOPBAR}px)`,
+      maxWidth: '100vw',
+      maxHeight: `calc(100vh - ${TOPBAR}px)`,
+      positionStrategy: this.overlay
+        .position()
+        .global()
+        .top(`${TOPBAR}px`)
+        .left('0')
+    });
   }
 
   protected openZoom(): void {

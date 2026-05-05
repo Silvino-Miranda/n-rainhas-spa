@@ -93,6 +93,16 @@
 
     <section class="nq-solver__chart" aria-label="Gráfico de evolução">
       @if (hasChart()) {
+        <button
+          type="button"
+          class="nq-solver__chart-expand"
+          (click)="openChartExpand()"
+          title="Ampliar gráfico"
+          aria-label="Ampliar gráfico em tela cheia"
+        >
+          <lucide-icon [name]="expandChartIcon" [size]="14" aria-hidden="true"></lucide-icon>
+          <span>Ampliar</span>
+        </button>
         <app-training-chart
           [algorithm]="store.algorithm()!"
           [evolutionHistory]="store.evolutionHistory()"

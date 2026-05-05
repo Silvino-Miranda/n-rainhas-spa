@@ -158,8 +158,35 @@
   }
 
   &__chart {
+    position: relative;
     display: flex;
     min-height: 320px;
+  }
+
+  &__chart-expand {
+    position: absolute;
+    top: var(--nq-space-3);
+    right: var(--nq-space-3);
+    z-index: var(--nq-z-raised);
+    display: inline-flex;
+    align-items: center;
+    gap: var(--nq-space-1);
+    padding: 4px var(--nq-space-2);
+    border-radius: var(--nq-radius-full);
+    background: var(--nq-surface-card);
+    border: 1px solid var(--nq-surface-border);
+    color: var(--nq-text-secondary);
+    font-family: var(--nq-font-mono);
+    font-size: var(--nq-text-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    transition: border-color var(--nq-duration-fast) var(--nq-ease-standard),
+                color var(--nq-duration-fast) var(--nq-ease-standard);
+
+    &:hover {
+      border-color: var(--nq-brand-primary);
+      color: var(--nq-brand-primary);
+    }
   }
 
   &__chart-placeholder {
@@ -237,4 +264,17 @@
 ::ng-deep .nq-dialog-backdrop {
   background: var(--nq-surface-overlay);
   backdrop-filter: blur(4px);
+}
+
+// Chart-expand dialog: backdrop sits below the 64px topbar so the bar
+// stays visible and interactive. Pane is positioned by the global
+// position strategy (top: 64px, left: 0).
+::ng-deep .nq-chart-expand-backdrop {
+  top: 64px !important;
+  background: var(--nq-surface-overlay);
+  backdrop-filter: blur(2px);
+}
+::ng-deep .cdk-overlay-pane.nq-chart-expand-panel {
+  padding: var(--nq-space-4);
+  box-sizing: border-box;
 }
