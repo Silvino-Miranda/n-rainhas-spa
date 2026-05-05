@@ -1,12 +1,12 @@
 import type { SolveResult, BrainPoint } from '../../../../shared/models/algorithm.types';
 import { countConflicts, countQueensWithConflicts, getConflictsForQueen, minConflictsStep, queensToBoard, randomPermutation } from './utils';
-
-export interface BrainOptions {
-  reportEvery?: number;
-  onTick?: (point: BrainPoint) => void;
-  onProgress?: (percent: number, iteration: number, error: number) => void;
-  shouldCancel?: () => boolean;
-}
+// Static import so esbuild bundles brain.js into the worker chunk. The
+// previous dynamic import('brain.js') silently failed under GitHub Pages'
+// /n-rainhas-spa/ base path because the chunk URL resolved against the
+// worker script instead of the document, and the CommonJS interop did
+// not expose NeuralNetwork at the namespace root.
+// @ts-expect-error brain.js ships untyped CommonJS; we cast below.
+import * as brainNamespace from 'brain.js';
 
 interface BrainNet {
   train: (data: { input: Record<string, number>; output: Record<string, number> }[], options: { iterations: number; errorThresh: number; log: boolean }) => unknown;
@@ -15,6 +15,18 @@ interface BrainNet {
 
 interface BrainModule {
   NeuralNetwork: new (options: { hiddenLayers: number[]; activation: string; learningRate: number }) => BrainNet;
+}
+
+const brainNs = brainNamespace as unknown as Partial<BrainModule> & { default?: Partial<BrainModule> };
+const brainModule: BrainModule = ((brainNs.default && brainNs.default.NeuralNetwork)
+  ? (brainNs.default as BrainModule)
+  : (brainNs as BrainModule));
+
+export interface BrainOptions {
+  reportEvery?: number;
+  onTick?: (point: BrainPoint) => void;
+  onProgress?: (percent: number, iteration: number, error: number) => void;
+  shouldCancel?: () => boolean;
 }
 
 export async function solveBrain(n: number, opts: BrainOptions = {}): Promise<SolveResult> {
@@ -32,7 +44,6 @@ export async function solveBrain(n: number, opts: BrainOptions = {}): Promise<So
     return { board: null, algorithm: 'brain', n, solveTime: performance.now() - start, noSolution: true };
   }
 
-  const brainModule = (await import(/* webpackIgnore: true */ 'brain.js')) as unknown as BrainModule;
   const maxIterations = n <= 8 ? 1000 : n <= 12 ? 2000 : 3000;
   const reportEvery = opts.reportEvery ?? 10;
 
