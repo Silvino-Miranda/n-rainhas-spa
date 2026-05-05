@@ -9,6 +9,11 @@ on:
 permissions:
   contents: read
 
+# Allow only one concurrent deployment, but never cancel an in-progress run.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
 jobs:
   build:
     name: Lint, Test, Build
@@ -85,3 +90,54 @@ jobs:
           uploadArtifacts: true
           temporaryPublicStorage: true
         continue-on-error: true
+
+  deploy:
+    name: Deploy to GitHub Pages
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build for GitHub Pages
+        run: pnpm build --configuration production --base-href=/${{ github.event.repository.name }}/
+
+      - name: SPA fallback (copy index.html to 404.html)
+        shell: bash
+        run: |
+          cp dist/n-rainhas/browser/index.html dist/n-rainhas/browser/404.html
+
+      - name: Disable Jekyll on GitHub Pages
+        shell: bash
+        run: touch dist/n-rainhas/browser/.nojekyll
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist/n-rainhas/browser
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
