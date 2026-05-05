@@ -133,24 +133,16 @@
   }
 
   &__mini-wrap {
+    display: flex;
+    justify-content: center;
     width: 100%;
-    max-width: 320px;
 
-    // Compact the inner ResultsBoard for mini variant
+    // Tighten internal paddings/typography only — let the component size
+    // its cells via the `targetSize` input so the board edge length stays
+    // constant regardless of N.
     ::ng-deep .nq-board {
       padding: var(--nq-space-3);
       box-shadow: var(--nq-shadow-1);
-    }
-    ::ng-deep .nq-board__grid {
-      --nq-board-size: 26px !important;
-      grid-auto-rows: 26px !important;
-    }
-    ::ng-deep .nq-board__cell {
-      width: 26px !important;
-      height: 26px !important;
-    }
-    ::ng-deep .nq-board__queen {
-      font-size: 18px !important;
     }
     ::ng-deep .nq-board__stats {
       padding: var(--nq-space-2);

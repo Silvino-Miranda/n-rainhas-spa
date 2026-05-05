@@ -16,10 +16,20 @@ export class ResultsBoardComponent {
   readonly solveTime = input(0);
   readonly generations = input<number | null>(null);
   readonly iterations = input<number | null>(null);
+  /**
+   * Total board edge length in pixels. When set, every cell is sized to
+   * floor(targetSize / N) so the board occupies the same area regardless
+   * of N. When null, cellSize falls back to a per-N step scale.
+   */
+  readonly targetSize = input<number | null>(null);
 
   protected readonly n = computed(() => this.board().length);
   protected readonly cellSize = computed(() => {
     const size = this.n();
+    const target = this.targetSize();
+    if (target != null) {
+      return Math.max(8, Math.floor(target / size));
+    }
     if (size <= 6) return 60;
     if (size <= 9) return 52;
     if (size <= 12) return 44;
