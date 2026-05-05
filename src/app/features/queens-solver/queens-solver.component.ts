@@ -1,6 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, OnDestroy, OnInit, signal } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
-import { from } from 'rxjs';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { Dialog } from '@angular/cdk/dialog';
 import { FormControlsComponent } from './components/form-controls/form-controls.component';
 import { ResultsBoardComponent } from './components/results-board/results-board.component';
@@ -16,7 +14,7 @@ import {
 import { QueensSolverStore } from './state/queens-solver.store';
 import { SolverOrchestratorService } from './services/solver-orchestrator.service';
 import { PersistenceService } from '../../data-access/persistence.service';
-import type { AlgorithmType, ChampionV2 } from '../../shared/models/algorithm.types';
+import type { AlgorithmType, ChampionsView, ChampionV2 } from '../../shared/models/algorithm.types';
 import { LucideAngularModule, Maximize2 } from 'lucide-angular';
 
 const DEMO_SEQUENCE: AlgorithmType[] = ['backtracking', 'ga', 'nn', 'brain'];
@@ -46,11 +44,20 @@ export class QueensSolverComponent implements OnInit, OnDestroy {
 
   protected readonly evolveFromSeed = signal(true);
   protected readonly demoQueue = signal<AlgorithmType[]>([]);
-  protected readonly championsView = signal<'cards' | 'table'>('cards');
+  protected readonly championsView = signal<ChampionsView>('cards');
 
   protected readonly zoomIcon = Maximize2;
 
-  protected readonly champions = toSignal(from(this.persistence.getChampions()), { initialValue: [] as ChampionV2[] });
+  protected readonly champions = signal<ChampionV2[]>([]);
+
+  constructor() {
+    // Re-fetch champions whenever the persistence layer signals a change
+    // (saveChampion, deleteChampion, clearAllChampions, importAll).
+    effect(() => {
+      this.persistence.changeTick();
+      void this.persistence.getChampions().then(list => this.champions.set(list));
+    });
+  }
 
   protected readonly seedExists = computed(() => {
     return this.champions().some(c => c.algorithm === 'ga' && c.n === this.store.n());
@@ -67,6 +74,12 @@ export class QueensSolverComponent implements OnInit, OnDestroy {
   async ngOnInit(): Promise<void> {
     const prefs = await this.persistence.getPreferences();
     this.store.setN(prefs.lastQueensCount);
+    this.championsView.set(prefs.championsView ?? 'cards');
+  }
+
+  protected onViewChange(view: ChampionsView): void {
+    this.championsView.set(view);
+    void this.persistence.setPreference('championsView', view);
   }
 
   ngOnDestroy(): void {
@@ -127,13 +140,11 @@ export class QueensSolverComponent implements OnInit, OnDestroy {
 
   protected async onRemoveChampion(c: ChampionV2): Promise<void> {
     await this.persistence.deleteChampion(c.id);
-    location.reload();
   }
 
   protected async onClearAll(): Promise<void> {
     if (!confirm('Apagar todos os campeões? Esta ação não pode ser desfeita.')) return;
     await this.persistence.clearAllChampions();
-    location.reload();
   }
 
   protected openZoom(): void {

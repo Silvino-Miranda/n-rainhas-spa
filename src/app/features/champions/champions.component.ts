@@ -1,10 +1,9 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
-import { from } from 'rxjs';
+import { ChangeDetectionStrategy, Component, effect, inject, OnInit, signal } from '@angular/core';
+import { Router } from '@angular/router';
 import { ChampionsTableComponent } from '../queens-solver/components/champions-table/champions-table.component';
 import { EmptyStateComponent } from '../../shared/ui/empty-state/empty-state.component';
 import { PersistenceService } from '../../data-access/persistence.service';
-import type { ChampionV2 } from '../../shared/models/algorithm.types';
+import type { ChampionsView, ChampionV2 } from '../../shared/models/algorithm.types';
 
 @Component({
   selector: 'app-champions',
@@ -31,7 +30,7 @@ import type { ChampionV2 } from '../../shared/models/algorithm.types';
           (viewSolution)="redirect()"
           (removeChampion)="onRemove($event)"
           (clearAll)="onClearAll()"
-          (viewChange)="view.set($event)"
+          (viewChange)="onViewChange($event)"
         />
       }
     </div>
@@ -68,23 +67,40 @@ import type { ChampionV2 } from '../../shared/models/algorithm.types';
     }
   `]
 })
-export class ChampionsComponent {
+export class ChampionsComponent implements OnInit {
   private readonly persistence = inject(PersistenceService);
-  protected readonly view = signal<'cards' | 'table'>('cards');
-  protected readonly champions = toSignal(from(this.persistence.getChampions()), { initialValue: [] as ChampionV2[] });
+  private readonly router = inject(Router);
+
+  protected readonly view = signal<ChampionsView>('cards');
+  protected readonly champions = signal<ChampionV2[]>([]);
+
+  constructor() {
+    effect(() => {
+      this.persistence.changeTick();
+      void this.persistence.getChampions().then(list => this.champions.set(list));
+    });
+  }
+
+  async ngOnInit(): Promise<void> {
+    const prefs = await this.persistence.getPreferences();
+    this.view.set(prefs.championsView ?? 'cards');
+  }
+
+  protected onViewChange(view: ChampionsView): void {
+    this.view.set(view);
+    void this.persistence.setPreference('championsView', view);
+  }
 
   protected redirect(): void {
-    location.href = '/';
+    void this.router.navigateByUrl('/');
   }
 
   protected async onRemove(c: ChampionV2): Promise<void> {
     await this.persistence.deleteChampion(c.id);
-    location.reload();
   }
 
   protected async onClearAll(): Promise<void> {
     if (!confirm('Apagar todos os campeões? Esta ação não pode ser desfeita.')) return;
     await this.persistence.clearAllChampions();
-    location.reload();
   }
 }

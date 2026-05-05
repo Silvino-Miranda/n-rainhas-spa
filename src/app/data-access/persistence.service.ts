@@ -24,6 +24,7 @@ const DEFAULT_PREFS: PreferencesV2 = {
   lastQueensCount: 8,
   lastAlgorithm: 'backtracking',
   autoSaveChampions: true,
+  championsView: 'cards',
   updatedAt: Date.now()
 };
 

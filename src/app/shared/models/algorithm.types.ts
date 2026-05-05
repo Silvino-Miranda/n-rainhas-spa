@@ -61,11 +61,14 @@ export interface ChampionV2 {
   brainHistory?: BrainPoint[];
 }
 
+export type ChampionsView = 'cards' | 'table';
+
 export interface PreferencesV2 {
   schemaVersion: 2;
   theme: 'light' | 'dark';
   lastQueensCount: number;
   lastAlgorithm: AlgorithmType;
   autoSaveChampions: boolean;
+  championsView: ChampionsView;
   updatedAt: number;
 }
