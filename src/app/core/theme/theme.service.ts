@@ -9,7 +9,9 @@ export class ThemeService {
   private readonly doc = inject(DOCUMENT);
   private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
 
-  private readonly _theme = signal<Theme>('dark');
+  // Resolve the initial theme synchronously so the constructor effect does
+  // not overwrite the persisted value on its first run.
+  private readonly _theme = signal<Theme>(this.resolveInitialTheme());
   readonly theme = this._theme.asReadonly();
 
   constructor() {
@@ -25,20 +27,9 @@ export class ThemeService {
     });
   }
 
+  /** Kept for APP_INITIALIZER compatibility; initial value already resolved. */
   initialize(): void {
-    if (!this.isBrowser) return;
-    let initial: Theme = 'dark';
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY) as Theme | null;
-      if (saved === 'light' || saved === 'dark') {
-        initial = saved;
-      } else if (window.matchMedia?.('(prefers-color-scheme: light)').matches) {
-        initial = 'light';
-      }
-    } catch {
-      /* fall back to dark */
-    }
-    this._theme.set(initial);
+    /* no-op */
   }
 
   toggle(): void {
@@ -47,5 +38,21 @@ export class ThemeService {
 
   set(theme: Theme): void {
     this._theme.set(theme);
+  }
+
+  private resolveInitialTheme(): Theme {
+    if (!this.isBrowser) return 'dark';
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY) as Theme | null;
+      if (saved === 'light' || saved === 'dark') return saved;
+    } catch {
+      /* storage may be unavailable */
+    }
+    try {
+      if (window.matchMedia?.('(prefers-color-scheme: light)').matches) return 'light';
+    } catch {
+      /* matchMedia may be unavailable */
+    }
+    return 'dark';
   }
 }

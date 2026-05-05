@@ -125,6 +125,25 @@
     text-align: center;
     background: color-mix(in oklab, var(--nq-surface-card) 50%, transparent);
   }
+
+  &__champions-link {
+    margin-top: var(--nq-space-2);
+    font-family: var(--nq-font-mono);
+    font-size: var(--nq-text-sm);
+    color: var(--nq-text-secondary);
+    text-align: center;
+
+    a {
+      color: var(--nq-brand-primary);
+      text-decoration: none;
+      border-bottom: 1px dashed currentColor;
+      padding-bottom: 1px;
+    }
+
+    a:hover {
+      color: var(--nq-text-primary);
+    }
+  }
 }
 
 // Chart-first layout: mini-board ~340px on the left, chart fills the rest

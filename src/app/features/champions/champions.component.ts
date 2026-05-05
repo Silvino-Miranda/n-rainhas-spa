@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { ChampionsTableComponent } from '../queens-solver/components/champions-table/champions-table.component';
 import { EmptyStateComponent } from '../../shared/ui/empty-state/empty-state.component';
 import { PersistenceService } from '../../data-access/persistence.service';
+import { QueensSolverStore } from '../queens-solver/state/queens-solver.store';
 import type { ChampionsView, ChampionV2 } from '../../shared/models/algorithm.types';
 
 @Component({
@@ -27,7 +28,7 @@ import type { ChampionsView, ChampionV2 } from '../../shared/models/algorithm.ty
         <app-champions-table
           [champions]="champions()"
           [view]="view()"
-          (viewSolution)="redirect()"
+          (viewSolution)="onView($event)"
           (removeChampion)="onRemove($event)"
           (clearAll)="onClearAll()"
           (viewChange)="onViewChange($event)"
@@ -70,6 +71,7 @@ import type { ChampionsView, ChampionV2 } from '../../shared/models/algorithm.ty
 export class ChampionsComponent implements OnInit {
   private readonly persistence = inject(PersistenceService);
   private readonly router = inject(Router);
+  private readonly store = inject(QueensSolverStore);
 
   protected readonly view = signal<ChampionsView>('cards');
   protected readonly champions = signal<ChampionV2[]>([]);
@@ -91,7 +93,18 @@ export class ChampionsComponent implements OnInit {
     void this.persistence.setPreference('championsView', view);
   }
 
-  protected redirect(): void {
+  protected onView(c: ChampionV2): void {
+    this.store.loadFromChampion({
+      algorithm: c.algorithm,
+      n: c.n,
+      board: c.board,
+      solveTime: c.solveTime,
+      generations: c.generations,
+      iterations: c.iterations,
+      evolutionHistory: c.evolutionHistory,
+      trainingHistory: c.trainingHistory,
+      brainHistory: c.brainHistory
+    });
     void this.router.navigateByUrl('/');
   }
 

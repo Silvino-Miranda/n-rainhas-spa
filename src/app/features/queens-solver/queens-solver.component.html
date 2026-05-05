@@ -83,13 +83,9 @@
   </section>
 
   @if (champions().length > 0) {
-    <app-champions-table
-      [champions]="champions()"
-      [view]="championsView()"
-      (viewSolution)="onViewChampion($event)"
-      (removeChampion)="onRemoveChampion($event)"
-      (clearAll)="onClearAll()"
-      (viewChange)="onViewChange($event)"
-    />
+    <p class="nq-solver__champions-link">
+      {{ champions().length }} {{ champions().length === 1 ? 'campeão registrado' : 'campeões registrados' }} —
+      <a routerLink="/champions">ver tabela completa</a>
+    </p>
   }
 </div>

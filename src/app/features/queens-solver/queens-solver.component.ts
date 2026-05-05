@@ -1,11 +1,12 @@
 import { ChangeDetectionStrategy, Component, computed, effect, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { Dialog } from '@angular/cdk/dialog';
+import { RouterLink } from '@angular/router';
+import { LucideAngularModule, Maximize2 } from 'lucide-angular';
 import { FormControlsComponent } from './components/form-controls/form-controls.component';
 import { ResultsBoardComponent } from './components/results-board/results-board.component';
 import { LoadingStateComponent } from './components/loading-state/loading-state.component';
 import { NoSolutionAlertComponent } from './components/no-solution-alert/no-solution-alert.component';
 import { TrainingChartComponent } from './components/training-chart/training-chart.component';
-import { ChampionsTableComponent } from './components/champions-table/champions-table.component';
 import { EmptyStateComponent } from '../../shared/ui/empty-state/empty-state.component';
 import {
   BoardZoomDialogComponent,
@@ -14,8 +15,7 @@ import {
 import { QueensSolverStore } from './state/queens-solver.store';
 import { SolverOrchestratorService } from './services/solver-orchestrator.service';
 import { PersistenceService } from '../../data-access/persistence.service';
-import type { AlgorithmType, ChampionsView, ChampionV2 } from '../../shared/models/algorithm.types';
-import { LucideAngularModule, Maximize2 } from 'lucide-angular';
+import type { AlgorithmType, ChampionV2 } from '../../shared/models/algorithm.types';
 
 const DEMO_SEQUENCE: AlgorithmType[] = ['backtracking', 'ga', 'nn', 'brain'];
 
@@ -28,9 +28,9 @@ const DEMO_SEQUENCE: AlgorithmType[] = ['backtracking', 'ga', 'nn', 'brain'];
     LoadingStateComponent,
     NoSolutionAlertComponent,
     TrainingChartComponent,
-    ChampionsTableComponent,
     EmptyStateComponent,
-    LucideAngularModule
+    LucideAngularModule,
+    RouterLink
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './queens-solver.component.html',
@@ -44,15 +44,12 @@ export class QueensSolverComponent implements OnInit, OnDestroy {
 
   protected readonly evolveFromSeed = signal(true);
   protected readonly demoQueue = signal<AlgorithmType[]>([]);
-  protected readonly championsView = signal<ChampionsView>('cards');
 
   protected readonly zoomIcon = Maximize2;
 
   protected readonly champions = signal<ChampionV2[]>([]);
 
   constructor() {
-    // Re-fetch champions whenever the persistence layer signals a change
-    // (saveChampion, deleteChampion, clearAllChampions, importAll).
     effect(() => {
       this.persistence.changeTick();
       void this.persistence.getChampions().then(list => this.champions.set(list));
@@ -74,12 +71,6 @@ export class QueensSolverComponent implements OnInit, OnDestroy {
   async ngOnInit(): Promise<void> {
     const prefs = await this.persistence.getPreferences();
     this.store.setN(prefs.lastQueensCount);
-    this.championsView.set(prefs.championsView ?? 'cards');
-  }
-
-  protected onViewChange(view: ChampionsView): void {
-    this.championsView.set(view);
-    void this.persistence.setPreference('championsView', view);
   }
 
   ngOnDestroy(): void {
@@ -122,29 +113,6 @@ export class QueensSolverComponent implements OnInit, OnDestroy {
     this.demoQueue.set(queue);
     if (!next) return;
     this.orchestrator.solve(next, this.store.n());
-  }
-
-  protected onViewChampion(c: ChampionV2): void {
-    this.store.loadFromChampion({
-      algorithm: c.algorithm,
-      n: c.n,
-      board: c.board,
-      solveTime: c.solveTime,
-      generations: c.generations,
-      iterations: c.iterations,
-      evolutionHistory: c.evolutionHistory,
-      trainingHistory: c.trainingHistory,
-      brainHistory: c.brainHistory
-    });
-  }
-
-  protected async onRemoveChampion(c: ChampionV2): Promise<void> {
-    await this.persistence.deleteChampion(c.id);
-  }
-
-  protected async onClearAll(): Promise<void> {
-    if (!confirm('Apagar todos os campeões? Esta ação não pode ser desfeita.')) return;
-    await this.persistence.clearAllChampions();
   }
 
   protected openZoom(): void {
