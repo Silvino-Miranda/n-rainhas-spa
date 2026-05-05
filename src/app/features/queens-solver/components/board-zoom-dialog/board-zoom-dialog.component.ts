@@ -37,6 +37,7 @@ export interface BoardZoomData {
           [solveTime]="data.solveTime"
           [generations]="data.generations"
           [iterations]="data.iterations"
+          statsPosition="beside"
         />
       </div>
     </div>
