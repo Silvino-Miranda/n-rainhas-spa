@@ -9,6 +9,14 @@ on:
 permissions:
   contents: read
 
+# Opt every JavaScript action into Node.js 24 ahead of the GitHub-mandated
+# 2026-06-02 cut-over. Removes the 'Node.js 20 actions are deprecated'
+# warning emitted by checkout, setup-node, upload-artifact and
+# pnpm/action-setup at v4. Drop this block once those actions ship a v5
+# that defaults to Node 24.
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
 # Allow only one concurrent deployment, but never cancel an in-progress run.
 concurrency:
   group: pages
