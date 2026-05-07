@@ -1,0 +1,34 @@
+# Traefik comes pre-installed with K3s. The ingressClassName 'traefik' picks
+# it up automatically. Replace n-rainhas.example.com with your real DNS.
+# For TLS, install cert-manager and uncomment the tls block + cluster-issuer
+# annotation.
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: n-rainhas-web
+  namespace: n-rainhas
+  labels:
+    app.kubernetes.io/name: n-rainhas-spa
+    app.kubernetes.io/component: web
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
+    # Uncomment when cert-manager is installed:
+    # cert-manager.io/cluster-issuer: letsencrypt-prod
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: n-rainhas.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: n-rainhas-web
+                port:
+                  number: 80
+  # tls:
+  #   - hosts:
+  #       - n-rainhas.example.com
+  #     secretName: n-rainhas-tls

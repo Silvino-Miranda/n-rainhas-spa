@@ -44,3 +44,18 @@ testem.log
 # System Files
 .DS_Store
 Thumbs.db
+# AIOS Local (AIOS)
+.aiox
+.aiox-core/local/
+.claude/settings.local.json
+.aiox/install-log.txt
+.agent
+.aiox-core
+.antigravity
+.claude
+.codex
+.cursor
+.gemini
+.github/agents
+.github/copilot-instructions.md
+AGENTS.md

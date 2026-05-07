@@ -1,0 +1,208 @@
+// =============================================================================
+// N-RAINHAS DESIGN SYSTEM v2 — "Scientific Noir"
+// All tokens prefixed --nq-*  ·  Dark mode is canonical
+// =============================================================================
+
+@use 'sass:meta';
+
+// -----------------------------------------------------------------------------
+// FONT IMPORT
+// -----------------------------------------------------------------------------
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+// =============================================================================
+// :root — DARK (canonical)
+// =============================================================================
+:root {
+  color-scheme: dark;
+
+  // BRAND
+  --nq-brand-primary:      #D4A853;
+  --nq-brand-primary-dim:  #A07830;
+  --nq-brand-primary-glow: #D4A85340;
+
+  // SURFACE
+  --nq-surface-bg:      #0F0F12;
+  --nq-surface-card:    #1A1A1F;
+  --nq-surface-subtle:  #242429;
+  --nq-surface-border:  #2E2E36;
+  --nq-surface-overlay: rgba(0, 0, 0, 0.7);
+
+  // TEXT
+  --nq-text-primary:   #F0EDE6;
+  --nq-text-secondary: #9896A0;
+  --nq-text-inverse:   #0F0F12;
+  --nq-text-disabled:  #4A4A55;
+  --nq-text-link:      #D4A853;
+
+  // SEMANTIC
+  --nq-success:    #3DAA72;
+  --nq-success-bg: #0D2E1F;
+  --nq-warning:    #D4A853;
+  --nq-warning-bg: #2A1F00;
+  --nq-danger:     #C0443A;
+  --nq-danger-bg:  #2A0A08;
+  --nq-info:       #3A7BD4;
+  --nq-info-bg:    #08152A;
+
+  // BOARD
+  --nq-board-light:       #E8D5B0;
+  --nq-board-dark:        #8B6340;
+  --nq-board-queen-light: #B8E6C0;
+  --nq-board-queen-dark:  #2D7A45;
+  --nq-board-queen-icon:  #D4A853;
+  --nq-board-border:      #1A1208;
+
+  // CHART (4 algoritmos)
+  --nq-chart-bt:    #6C8EBF; // Backtracking
+  --nq-chart-ga:    #8BC34A; // Genetic
+  --nq-chart-nn:    #E08030; // Hopfield
+  --nq-chart-brain: #B060CC; // Brain.js
+
+  // TYPOGRAPHY
+  --nq-font-display: 'DM Serif Display', Georgia, serif;
+  --nq-font-body:    'DM Sans', system-ui, -apple-system, sans-serif;
+  --nq-font-mono:    'JetBrains Mono', 'Fira Code', ui-monospace, monospace;
+
+  --nq-text-xs:   0.75rem;
+  --nq-text-sm:   0.875rem;
+  --nq-text-base: 1rem;
+  --nq-text-lg:   1.125rem;
+  --nq-text-xl:   1.25rem;
+  --nq-text-2xl:  1.5rem;
+  --nq-text-3xl:  1.875rem;
+  --nq-text-4xl:  2.25rem;
+  --nq-text-5xl:  3rem;
+
+  --nq-leading-tight:   1.2;
+  --nq-leading-snug:    1.35;
+  --nq-leading-normal:  1.5;
+  --nq-leading-relaxed: 1.75;
+
+  --nq-weight-regular: 400;
+  --nq-weight-medium:  500;
+  --nq-weight-semi:    600;
+  --nq-weight-bold:    700;
+
+  // SPACING (base 4px)
+  --nq-space-0:  0;
+  --nq-space-1:  4px;
+  --nq-space-2:  8px;
+  --nq-space-3:  12px;
+  --nq-space-4:  16px;
+  --nq-space-5:  20px;
+  --nq-space-6:  24px;
+  --nq-space-8:  32px;
+  --nq-space-10: 40px;
+  --nq-space-12: 48px;
+  --nq-space-16: 64px;
+  --nq-space-20: 80px;
+  --nq-space-24: 96px;
+
+  // RADII
+  --nq-radius-none: 0;
+  --nq-radius-sm:   4px;
+  --nq-radius-md:   8px;
+  --nq-radius-lg:   12px;
+  --nq-radius-xl:   20px;
+  --nq-radius-full: 9999px;
+
+  // SHADOWS
+  --nq-shadow-1: 0 1px 3px rgba(0, 0, 0, 0.35);
+  --nq-shadow-2: 0 4px 12px rgba(0, 0, 0, 0.40);
+  --nq-shadow-3: 0 8px 24px rgba(0, 0, 0, 0.45), 0 2px 6px rgba(0, 0, 0, 0.30);
+  --nq-shadow-4: 0 20px 48px rgba(0, 0, 0, 0.55), 0 4px 12px rgba(0, 0, 0, 0.40);
+
+  // MOTION
+  --nq-duration-fast: 120ms;
+  --nq-duration-base: 240ms;
+  --nq-duration-slow: 480ms;
+
+  --nq-ease-standard:   cubic-bezier(0.4, 0.0, 0.2, 1);
+  --nq-ease-emphasized: cubic-bezier(0.2, 0.0, 0.0, 1);
+  --nq-ease-decelerate: cubic-bezier(0.0, 0.0, 0.2, 1);
+
+  // Z-INDEX
+  --nq-z-base:    0;
+  --nq-z-raised:  10;
+  --nq-z-sticky:  100;
+  --nq-z-overlay: 200;
+  --nq-z-modal:   300;
+  --nq-z-toast:   400;
+  --nq-z-top:     500;
+}
+
+// =============================================================================
+// LIGHT theme override
+// =============================================================================
+[data-theme='light'] {
+  color-scheme: light;
+
+  --nq-surface-bg:      #F7F5F0;
+  --nq-surface-card:    #FFFFFF;
+  --nq-surface-subtle:  #EDEBE4;
+  --nq-surface-border:  #D6D2C8;
+  --nq-surface-overlay: rgba(0, 0, 0, 0.4);
+
+  --nq-text-primary:   #1A1A1F;
+  --nq-text-secondary: #5A5868;
+  --nq-text-inverse:   #FFFFFF;
+  --nq-text-disabled:  #B0AEB8;
+
+  --nq-success-bg: #E6F4EC;
+  --nq-warning-bg: #FAF1DA;
+  --nq-danger-bg:  #FBEAE7;
+  --nq-info-bg:    #E5EEFA;
+
+  --nq-shadow-1: 0 1px 2px rgba(15, 15, 18, 0.08);
+  --nq-shadow-2: 0 4px 10px rgba(15, 15, 18, 0.10);
+  --nq-shadow-3: 0 8px 20px rgba(15, 15, 18, 0.12), 0 2px 4px rgba(15, 15, 18, 0.06);
+  --nq-shadow-4: 0 20px 40px rgba(15, 15, 18, 0.18), 0 4px 8px rgba(15, 15, 18, 0.10);
+}
+
+// Respect system preference when user has not chosen
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme]) {
+    color-scheme: light;
+
+    --nq-surface-bg:      #F7F5F0;
+    --nq-surface-card:    #FFFFFF;
+    --nq-surface-subtle:  #EDEBE4;
+    --nq-surface-border:  #D6D2C8;
+    --nq-surface-overlay: rgba(0, 0, 0, 0.4);
+
+    --nq-text-primary:   #1A1A1F;
+    --nq-text-secondary: #5A5868;
+    --nq-text-inverse:   #FFFFFF;
+    --nq-text-disabled:  #B0AEB8;
+
+    --nq-success-bg: #E6F4EC;
+    --nq-warning-bg: #FAF1DA;
+    --nq-danger-bg:  #FBEAE7;
+    --nq-info-bg:    #E5EEFA;
+  }
+}
+
+// =============================================================================
+// Reduced motion
+// =============================================================================
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+// =============================================================================
+// High contrast
+// =============================================================================
+@media (prefers-contrast: more) {
+  :root {
+    --nq-surface-border: #6A6878;
+    --nq-text-secondary: #C0BEC8;
+  }
+}

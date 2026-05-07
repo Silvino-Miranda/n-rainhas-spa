@@ -1,0 +1,143 @@
+<section class="nq-champions" aria-label="Campeões salvos">
+  <header class="nq-champions__header">
+    <div class="nq-champions__title">
+      <span class="nq-champions__icon" aria-hidden="true">
+        <lucide-icon [name]="trophyIcon" [size]="22"></lucide-icon>
+      </span>
+      <h2>Campeões</h2>
+      <span class="nq-champions__count">{{ filtered().length }}/{{ champions().length }}</span>
+    </div>
+
+    <div class="nq-champions__actions">
+      <div class="nq-champions__view-toggle" role="group" aria-label="Modo de visualização">
+        <button
+          type="button"
+          class="nq-champions__view-btn"
+          [class.is-active]="view() === 'cards'"
+          (click)="viewChange.emit('cards')"
+          aria-label="Ver como cards"
+        >
+          <lucide-icon [name]="gridIcon" [size]="16" aria-hidden="true"></lucide-icon>
+        </button>
+        <button
+          type="button"
+          class="nq-champions__view-btn"
+          [class.is-active]="view() === 'table'"
+          (click)="viewChange.emit('table')"
+          aria-label="Ver como tabela"
+        >
+          <lucide-icon [name]="tableIcon" [size]="16" aria-hidden="true"></lucide-icon>
+        </button>
+      </div>
+
+      <button type="button" class="nq-champions__clear" (click)="clearAll.emit()" [disabled]="champions().length === 0">
+        <lucide-icon [name]="trashIcon" [size]="16" aria-hidden="true"></lucide-icon>
+        Limpar todos
+      </button>
+    </div>
+  </header>
+
+  <div class="nq-champions__filters">
+    <label>
+      <span>Algoritmo</span>
+      <select (change)="filterAlgorithm.set($any($event.target).value)">
+        @for (algo of algorithms; track algo) {
+          <option [value]="algo">{{ algorithmLabel(algo) }}</option>
+        }
+      </select>
+    </label>
+    <label>
+      <span>N</span>
+      <select (change)="filterN.set($any($event.target).value === '' ? null : +$any($event.target).value)">
+        <option value="">Todos</option>
+        @for (n of uniqueNs(); track n) {
+          <option [value]="n">{{ n }}</option>
+        }
+      </select>
+    </label>
+    <label>
+      <span>Ordenar</span>
+      <select (change)="sortBy.set($any($event.target).value)">
+        @for (opt of sortOptions; track opt.key) {
+          <option [value]="opt.key" [selected]="sortBy() === opt.key">{{ opt.label }}</option>
+        }
+      </select>
+    </label>
+  </div>
+
+  @if (filtered().length === 0) {
+    <p class="nq-champions__empty">Nenhum campeão registrado para esse filtro.</p>
+  } @else if (view() === 'cards') {
+    <div class="nq-champions__grid">
+      @for (c of filtered(); track c.id) {
+        <article class="nq-champion-card" [style.--nq-algo-color]="colorFor(c.algorithm)">
+          <header>
+            <span class="nq-champion-card__badge">{{ algorithmLabel(c.algorithm) }}</span>
+            <span class="nq-champion-card__n">N={{ c.n }}</span>
+          </header>
+          <dl>
+            <div>
+              <dt>Tempo</dt>
+              <dd>{{ c.solveTime | number: '1.0-2' }} ms</dd>
+            </div>
+            <div>
+              <dt>Métrica</dt>
+              <dd>{{ metricFor(c) }}</dd>
+            </div>
+            <div>
+              <dt>Quando</dt>
+              <dd>{{ c.createdAt | date: 'dd/MM/yyyy HH:mm' }}</dd>
+            </div>
+          </dl>
+          <footer>
+            <button type="button" class="nq-champion-card__view" (click)="viewSolution.emit(c)">
+              <lucide-icon [name]="eyeIcon" [size]="16" aria-hidden="true"></lucide-icon>
+              Ver solução
+            </button>
+            <button type="button" class="nq-champion-card__delete" (click)="removeChampion.emit(c)" aria-label="Remover campeão">
+              <lucide-icon [name]="trashIcon" [size]="16" aria-hidden="true"></lucide-icon>
+            </button>
+          </footer>
+        </article>
+      }
+    </div>
+  } @else {
+    <div class="nq-champions__table-wrap" role="region" aria-label="Tabela de campeões">
+      <table class="nq-champions__table">
+        <thead>
+          <tr>
+            <th>Algoritmo</th>
+            <th>N</th>
+            <th>Tempo (ms)</th>
+            <th>Métrica</th>
+            <th>Data</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (c of filtered(); track c.id) {
+            <tr>
+              <td>
+                <span class="nq-champions__pill" [style.--nq-algo-color]="colorFor(c.algorithm)">
+                  {{ algorithmLabel(c.algorithm) }}
+                </span>
+              </td>
+              <td class="nq-mono">{{ c.n }}</td>
+              <td class="nq-mono">{{ c.solveTime | number: '1.0-2' }}</td>
+              <td class="nq-mono">{{ metricFor(c) }}</td>
+              <td class="nq-mono">{{ c.createdAt | date: 'dd/MM/yyyy HH:mm' }}</td>
+              <td class="nq-champions__row-actions">
+                <button type="button" (click)="viewSolution.emit(c)" aria-label="Ver">
+                  <lucide-icon [name]="eyeIcon" [size]="16" aria-hidden="true"></lucide-icon>
+                </button>
+                <button type="button" (click)="removeChampion.emit(c)" aria-label="Remover">
+                  <lucide-icon [name]="trashIcon" [size]="16" aria-hidden="true"></lucide-icon>
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>

@@ -1,0 +1,34 @@
+<header class="nq-shell-header" role="banner">
+  <div class="nq-shell-header__inner nq-content-grid">
+    <a routerLink="/" class="nq-shell-brand" aria-label="N-Rainhas — voltar para o solver">
+      <span class="nq-shell-brand__mark" aria-hidden="true">♛</span>
+      <span class="nq-shell-brand__title">
+        <span class="nq-shell-brand__name">N-Rainhas</span>
+        <span class="nq-shell-brand__subtitle">Scientific Noir Edition</span>
+      </span>
+    </a>
+
+    <nav class="nq-shell-nav" aria-label="Navegação principal">
+      <a routerLink="/" routerLinkActive="is-active" [routerLinkActiveOptions]="{ exact: true }">Solver</a>
+      <a routerLink="/champions" routerLinkActive="is-active">Campeões</a>
+      <a routerLink="/about" routerLinkActive="is-active">Sobre</a>
+    </nav>
+
+    <div class="nq-shell-actions">
+      <a
+        href="https://github.com/Silvino-Miranda/n-rainhas-spa"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="nq-shell-ghost-link"
+        aria-label="Repositório no GitHub"
+      >
+        <lucide-icon [name]="githubIcon" [size]="20" aria-hidden="true"></lucide-icon>
+      </a>
+      <app-theme-toggle></app-theme-toggle>
+    </div>
+  </div>
+</header>
+
+<main class="nq-shell-main" role="main">
+  <ng-content></ng-content>
+</main>

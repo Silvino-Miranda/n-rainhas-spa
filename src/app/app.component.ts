@@ -1,14 +1,24 @@
-import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { QueensSolverComponent } from './queens-solver/queens-solver.component';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { RouterOutlet } from '@angular/router';
+import { AppShellComponent } from './shared/ui/app-shell/app-shell.component';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, QueensSolverComponent],
-  templateUrl: './app.component.html',
-  styleUrls: ['./app.component.scss']
+  imports: [RouterOutlet, AppShellComponent],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `
+    <app-shell>
+      <router-outlet />
+    </app-shell>
+  `,
+  styles: [`
+    :host {
+      display: block;
+      min-height: 100vh;
+      background: var(--nq-surface-bg);
+      color: var(--nq-text-primary);
+    }
+  `]
 })
-export class AppComponent {
-  title = 'n-rainhas';
-}
+export class AppComponent {}

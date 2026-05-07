@@ -1,0 +1,253 @@
+:host {
+  display: block;
+}
+
+.nq-content-grid {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 var(--nq-space-6);
+}
+
+.nq-solver {
+  display: flex;
+  flex-direction: column;
+  gap: var(--nq-space-5);
+
+  &__bar {
+    display: flex;
+    align-items: center;
+    gap: var(--nq-space-3);
+    flex-wrap: wrap;
+  }
+
+  &__bar-toolbar {
+    flex: 1 1 320px;
+    min-width: 0;
+  }
+
+  &__extras {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--nq-space-1);
+    flex: 0 0 auto;
+  }
+
+  &__extra-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--nq-space-1);
+    padding: 6px var(--nq-space-3);
+    border-radius: var(--nq-radius-full);
+    background: transparent;
+    border: 1px solid var(--nq-surface-border);
+    color: var(--nq-text-secondary);
+    font-family: var(--nq-font-mono);
+    font-size: var(--nq-text-xs);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    transition: border-color var(--nq-duration-fast) var(--nq-ease-standard),
+                color var(--nq-duration-fast) var(--nq-ease-standard),
+                background var(--nq-duration-fast) var(--nq-ease-standard);
+
+    &:hover:not(:disabled) {
+      border-color: var(--nq-brand-primary);
+      color: var(--nq-brand-primary);
+    }
+
+    &:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    &.is-on {
+      border-color: var(--nq-success);
+      color: var(--nq-success);
+      background: color-mix(in oklab, var(--nq-success) 14%, transparent);
+    }
+
+    span {
+      @media (max-width: 720px) {
+        display: none;
+      }
+    }
+  }
+
+  &__stage {
+    display: grid;
+    gap: var(--nq-space-4);
+    grid-template-columns: 1fr;
+    min-height: 460px;
+  }
+
+  &__board {
+    display: flex;
+    flex-direction: column;
+    gap: var(--nq-space-3);
+    padding: var(--nq-space-4);
+    background: var(--nq-surface-card);
+    border: 1px solid var(--nq-surface-border);
+    border-radius: var(--nq-radius-lg);
+    box-shadow: var(--nq-shadow-1);
+  }
+
+  &__board-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 var(--nq-space-1);
+  }
+
+  &__board-title {
+    font-family: var(--nq-font-display);
+    font-size: var(--nq-text-lg);
+    color: var(--nq-text-primary);
+  }
+
+  &__zoom {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--nq-space-1);
+    padding: 4px var(--nq-space-2);
+    border-radius: var(--nq-radius-full);
+    background: transparent;
+    border: 1px solid var(--nq-surface-border);
+    color: var(--nq-text-secondary);
+    font-family: var(--nq-font-mono);
+    font-size: var(--nq-text-xs);
+    transition: border-color var(--nq-duration-fast) var(--nq-ease-standard),
+                color var(--nq-duration-fast) var(--nq-ease-standard);
+
+    &:hover {
+      border-color: var(--nq-brand-primary);
+      color: var(--nq-brand-primary);
+    }
+  }
+
+  &__board-body {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 320px;
+  }
+
+  &__mini-wrap {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+
+    // Tighten internal paddings/typography only — let the component size
+    // its cells via the `targetSize` input so the board edge length stays
+    // constant regardless of N.
+    ::ng-deep .nq-board {
+      padding: var(--nq-space-3);
+      box-shadow: var(--nq-shadow-1);
+    }
+    ::ng-deep .nq-board__stats {
+      padding: var(--nq-space-2);
+      grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+      gap: var(--nq-space-2);
+    }
+    ::ng-deep .nq-board__stats dt {
+      font-size: 10px;
+    }
+    ::ng-deep .nq-board__stats dd {
+      font-size: var(--nq-text-sm);
+    }
+  }
+
+  &__chart {
+    display: flex;
+    min-height: 320px;
+  }
+
+  &__chart-placeholder {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--nq-space-8);
+    border: 1px dashed var(--nq-surface-border);
+    border-radius: var(--nq-radius-lg);
+    color: var(--nq-text-secondary);
+    font-family: var(--nq-font-mono);
+    font-size: var(--nq-text-sm);
+    text-align: center;
+    background: color-mix(in oklab, var(--nq-surface-card) 50%, transparent);
+  }
+
+  &__champions-link {
+    margin-top: var(--nq-space-2);
+    font-family: var(--nq-font-mono);
+    font-size: var(--nq-text-sm);
+    color: var(--nq-text-secondary);
+    text-align: center;
+
+    a {
+      color: var(--nq-brand-primary);
+      text-decoration: none;
+      border-bottom: 1px dashed currentColor;
+      padding-bottom: 1px;
+    }
+
+    a:hover {
+      color: var(--nq-text-primary);
+    }
+  }
+}
+
+// Chart-first layout: chart fills the left, mini-board ~360px on the right
+@media (min-width: 960px) {
+  .nq-solver__stage {
+    grid-template-columns: minmax(0, 1fr) 360px;
+    align-items: stretch;
+  }
+  .nq-solver__chart {
+    order: 1;
+    > * {
+      flex: 1;
+      width: 100%;
+    }
+  }
+  .nq-solver__board {
+    order: 2;
+  }
+}
+
+// On narrow screens, stack: chart on top (the star), then board
+@media (max-width: 959px) {
+  .nq-solver__stage {
+    grid-template-rows: auto auto;
+  }
+  .nq-solver__chart {
+    order: 1;
+  }
+  .nq-solver__board {
+    order: 2;
+  }
+}
+
+// CDK overlay panel — center & let the dialog component define max sizes
+::ng-deep .cdk-overlay-pane.nq-dialog-panel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+::ng-deep .nq-dialog-backdrop {
+  background: var(--nq-surface-overlay);
+  backdrop-filter: blur(4px);
+}
+
+// Chart-expand dialog: backdrop sits below the 64px topbar so the bar
+// stays visible and interactive. Pane is positioned by the global
+// position strategy (top: 64px, left: 0).
+::ng-deep .nq-chart-expand-backdrop {
+  top: 64px !important;
+  background: var(--nq-surface-overlay);
+  backdrop-filter: blur(2px);
+}
+::ng-deep .cdk-overlay-pane.nq-chart-expand-panel {
+  padding: var(--nq-space-4);
+  box-sizing: border-box;
+}

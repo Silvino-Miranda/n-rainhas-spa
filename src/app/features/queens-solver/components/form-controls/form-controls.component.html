@@ -1,0 +1,78 @@
+<section class="nq-toolbar" role="toolbar" aria-label="Controles do solver">
+  <div class="nq-toolbar__group">
+    <label for="nq-n-input" class="nq-toolbar__label">N</label>
+    <div class="nq-toolbar__stepper" role="group" aria-label="Selecionar N">
+      <button
+        type="button"
+        class="nq-toolbar__icon-btn"
+        (click)="step(-1)"
+        aria-label="Diminuir N"
+        [disabled]="isRunning() || n() <= 1"
+      >
+        <lucide-icon [name]="minusIcon" [size]="14" aria-hidden="true"></lucide-icon>
+      </button>
+      <input
+        id="nq-n-input"
+        type="number"
+        class="nq-toolbar__input"
+        [value]="n()"
+        [min]="1"
+        [max]="15"
+        [attr.aria-invalid]="invalid()"
+        (input)="updateN(($any($event.target)).value)"
+        [disabled]="isRunning()"
+        inputmode="numeric"
+      />
+      <button
+        type="button"
+        class="nq-toolbar__icon-btn"
+        (click)="step(1)"
+        aria-label="Aumentar N"
+        [disabled]="isRunning() || n() >= 15"
+      >
+        <lucide-icon [name]="plusIcon" [size]="14" aria-hidden="true"></lucide-icon>
+      </button>
+    </div>
+    @if (invalid()) {
+      <span class="nq-toolbar__error" role="alert">{{ errorMessage() }}</span>
+    }
+  </div>
+
+  <div class="nq-toolbar__divider" aria-hidden="true"></div>
+
+  <div class="nq-toolbar__group nq-toolbar__algos" role="group" aria-label="Algoritmos">
+    @for (algo of algorithms; track algo) {
+      <button
+        type="button"
+        class="nq-toolbar__algo"
+        [class.is-running]="isAlgorithmRunning(algo)"
+        [style.--nq-algo-color]="algorithmColor(algo)"
+        [disabled]="isAlgorithmDisabled(algo)"
+        [attr.aria-label]="'Executar ' + algorithmLabel(algo)"
+        [title]="algorithmLabel(algo)"
+        (click)="dispatchRun(algo)"
+      >
+        <lucide-icon [name]="$any(algorithmIcon(algo))" [size]="16" aria-hidden="true"></lucide-icon>
+        <span class="nq-toolbar__algo-label">{{ algorithmLabel(algo) }}</span>
+        @if (isAlgorithmRunning(algo) && progress() > 0) {
+          <span class="nq-toolbar__algo-progress" [style.width.%]="progress()" aria-hidden="true"></span>
+        }
+      </button>
+    }
+  </div>
+
+  @if (isRunning() && runningAlgorithm()) {
+    <div class="nq-toolbar__divider" aria-hidden="true"></div>
+    <div class="nq-toolbar__group">
+      <button
+        type="button"
+        class="nq-toolbar__icon-btn nq-toolbar__icon-btn--danger"
+        (click)="cancel.emit(runningAlgorithm()!)"
+        title="Cancelar execução"
+        aria-label="Cancelar"
+      >
+        <lucide-icon [name]="cancelIcon" [size]="14" aria-hidden="true"></lucide-icon>
+      </button>
+    </div>
+  }
+</section>

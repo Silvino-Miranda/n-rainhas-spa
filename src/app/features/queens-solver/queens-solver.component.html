@@ -1,0 +1,126 @@
+<div class="nq-solver nq-content-grid">
+  <div class="nq-solver__bar">
+    <app-form-controls
+      class="nq-solver__bar-toolbar"
+      [n]="store.n()"
+      [isRunning]="store.isRunning()"
+      [runningAlgorithm]="store.algorithm()"
+      [progress]="store.progress()"
+      [hasSeed]="seedExists()"
+      [evolveFromSeed]="evolveFromSeed()"
+      (nChange)="onNChange($event)"
+      (run)="onRun($event)"
+      (cancel)="onCancel()"
+      (evolveFromSeedChange)="evolveFromSeed.set($event)"
+      (demo)="onDemo()"
+    />
+
+    <div class="nq-solver__extras" role="group" aria-label="Ações extras">
+      @if (seedExists()) {
+        <button
+          type="button"
+          class="nq-solver__extra-btn"
+          [class.is-on]="evolveFromSeed()"
+          (click)="evolveFromSeed.set(!evolveFromSeed())"
+          [disabled]="store.isRunning()"
+          [attr.aria-pressed]="evolveFromSeed()"
+          [title]="evolveFromSeed() ? 'AG evolui a partir do campeão salvo' : 'AG inicia do zero'"
+          aria-label="Evoluir do campeão"
+        >
+          <lucide-icon [name]="seedIcon" [size]="14" aria-hidden="true"></lucide-icon>
+          <span>Seed</span>
+        </button>
+      }
+      <button
+        type="button"
+        class="nq-solver__extra-btn"
+        (click)="onDemo()"
+        [disabled]="store.isRunning()"
+        title="Rodar todos os 4 algoritmos sequencialmente"
+        aria-label="Rodar demo"
+      >
+        <lucide-icon [name]="demoIcon" [size]="14" aria-hidden="true"></lucide-icon>
+        <span>Demo</span>
+      </button>
+    </div>
+  </div>
+
+  <section class="nq-solver__stage" aria-label="Resultado e evolução">
+    <aside class="nq-solver__board" aria-label="Mini tabuleiro">
+      <header class="nq-solver__board-header">
+        <h2 class="nq-solver__board-title">Solução</h2>
+        @if (store.hasSolution() && store.board()) {
+          <button
+            type="button"
+            class="nq-solver__zoom"
+            (click)="openZoom()"
+            title="Ampliar tabuleiro"
+            aria-label="Abrir tabuleiro em modal ampliado"
+          >
+            <lucide-icon [name]="zoomIcon" [size]="14" aria-hidden="true"></lucide-icon>
+            <span>Zoom</span>
+          </button>
+        }
+      </header>
+
+      <div class="nq-solver__board-body">
+        @if (store.isRunning()) {
+          <app-loading-state
+            [algorithm]="store.algorithm()"
+            [progress]="store.progress()"
+          />
+        } @else if (store.hasNoSolution()) {
+          <app-no-solution-alert [n]="store.n()" />
+        } @else if (store.hasSolution() && store.board(); as board) {
+          <div class="nq-solver__mini-wrap">
+            <app-results-board
+              [board]="board"
+              [algorithm]="store.algorithm()!"
+              [solveTime]="store.solveTime()"
+              [generations]="store.generations() || null"
+              [iterations]="store.iterations() || null"
+              [targetSize]="280"
+            />
+          </div>
+        } @else {
+          <app-empty-state
+            title="Sem execução"
+            description="Escolha um algoritmo na toolbar para começar."
+          />
+        }
+      </div>
+    </aside>
+
+    <section class="nq-solver__chart" aria-label="Gráfico de evolução">
+      @if (hasChart()) {
+        <app-training-chart
+          [algorithm]="store.algorithm()!"
+          [evolutionHistory]="store.evolutionHistory()"
+          [trainingHistory]="store.trainingHistory()"
+          [brainHistory]="store.brainHistory()"
+          [expandable]="true"
+          (expand)="openChartExpand()"
+        />
+      } @else if (store.isRunning()) {
+        <div class="nq-solver__chart-placeholder">
+          <p>Coletando dados de evolução...</p>
+        </div>
+      } @else if (store.hasSolution() && store.algorithm() === 'backtracking') {
+        <div class="nq-solver__chart-placeholder">
+          <p>Backtracking é determinístico — não gera curva de evolução.</p>
+        </div>
+      } @else {
+        <div class="nq-solver__chart-placeholder">
+          <p>O gráfico de evolução aparecerá aqui após executar AG, Hopfield ou Brain.js.</p>
+        </div>
+      }
+    </section>
+  </section>
+
+  @if (champions().length > 0) {
+    <p class="nq-solver__champions-link">
+      {{ champions().length }} {{ champions().length === 1 ? 'campeão registrado' : 'campeões registrados' }} —
+      <a routerLink="/champions">ver tabela completa</a>
+    </p>
+  }
+</div>
